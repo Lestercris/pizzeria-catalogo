@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍕 Pizzería Bella Napoli</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #fef8f2;
+      color: #333;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    header h1 { font-size: 2rem; }
+    header p { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 25px;
+    }
+    @media (max-width: 850px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* Catálogo */
+    .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+    .producto {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .producto:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .producto img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: #eee;
+    }
+    .producto-body { padding: 15px; flex: 1; display: flex; flex-direction: column; }
+    .producto h3 { font-size: 1.15rem; color: #c0392b; margin-bottom: 6px; }
+    .producto .desc { font-size: 0.85rem; color: #666; margin-bottom: 8px; flex: 1; }
+    .producto .ingredientes { font-size: 0.78rem; color: #888; font-style: italic; margin-bottom: 10px; }
+    .producto .precio { font-size: 1.25rem; font-weight: bold; color: #27ae60; margin-bottom: 10px; }
+    .producto button {
+      background: #c0392b;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .producto button:hover { background: #a93226; }
+    .producto button:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* Carrito */
+    .carrito {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    .carrito h2 { color: #c0392b; margin-bottom: 15px; font-size: 1.3rem; }
+    .carrito-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.9rem;
+    }
+    .carrito-item .controles { display: flex; align-items: center; gap: 6px; }
+    .carrito-item button {
+      background: #eee;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+      color: #c0392b;
+    }
+    .carrito-item button:hover { background: #ddd; }
+    .carrito-vacio { color: #999; font-style: italic; text-align: center; padding: 15px 0; }
+    .total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 2px solid #c0392b;
+      color: #c0392b;
+    }
+    .carrito input {
+      width: 100%;
+      padding: 9px;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .btn-pagar {
+      width: 100%;
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      margin-top: 12px;
+      transition: background 0.2s;
+    }
+    .btn-pagar:hover { background: #229954; }
+    .btn-pagar:disabled { background: #aaa; cursor: not-allowed; }
+
+    .mensaje {
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .mensaje.ok { background: #d4edda; color: #155724; display: block; }
+    .mensaje.error { background: #f8d7da; color: #721c24; display: block; }
+
+    .loader { text-align: center; padding: 40px; color: #999; }
+    .loader::after {
+      content: '';
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 3px solid #ddd;
+      border-top-color: #c0392b;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🍕 Pizzería Bella Napoli</h1>
+    <p>Auténtica pizza italiana, hecha con amor</p>
+  </header>
+
+  <div class="container">
+    <main>
+      <h2 style="color:#c0392b; margin-bottom:15px;">Nuestro Menú</h2>
+      <div id="catalogo" class="catalogo">
+        <div class="loader">Cargando el menú...</div>
+      </div>
+    </main>
+
+    <aside>
+      <div class="carrito">
+        <h2>🛒 Tu Pedido</h2>
+        <div id="carrito-items">
+          <p class="carrito-vacio">El carrito está vacío</p>
+        </div>
+        <div class="total">
+          <span>Total:</span>
+          <span id="total">$0.00</span>
+        </div>
+        <input type="text" id="nombre" placeholder="Tu nombre" required>
+        <input type="email" id="email" placeholder="Tu email" required>
+        <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
+        <input type="text" id="direccion" placeholder="Dirección de entrega">
+        <button class="btn-pagar" id="btn-pagar" onclick="procesarPedido()" disabled>
+          Pagar y Enviar Pedido
+        </button>
+        <div id="mensaje" class="mensaje"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // ============================================
+    // ⚙️ CONFIGURACIÓN - REEMPLAZA CON TU URL
+    // ============================================
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/TU_ID_DE_IMPLEMENTACION/exec';
+    
+    // ============================================
+    let productos = [];
+    let carrito = {};
+
+    // ============================================
+    // 1. CARGAR PRODUCTOS (usando JSONP por CORS)
+    // ============================================
+    function cargarProductos() {
+      const script = document.createElement('script');
+      script.src = APPS_SCRIPT_URL + '?action=getProducts&callback=mostrarProductos';
+      script.onerror = () => {
+        document.getElementById('catalogo').innerHTML =
+          '<p style="color:red">Error al cargar el menú. Verifica tu conexión.</p>';
+      };
+      document.body.appendChild(script);
+    }
+
+    // Esta función se llama automáticamente cuando Apps Script responde
+    function mostrarProductos(data) {
+      productos = data;
+      const cont = document.getElementById('catalogo');
+      cont.innerHTML = '';
+
+      if (!productos || productos.length === 0) {
+        cont.innerHTML = '<p>No hay productos disponibles.</p>';
+        return;
+      }
+
+      productos.forEach(p => {
+        if (String(p.Disponible).toLowerCase() !== 'sí' &&
+            String(p.Disponible).toLowerCase() !== 'si') return;
+
+        const img = p.ImagenURL || 'https://via.placeholder.com/300x160?text=Pizza';
+        const card = document.createElement('div');
+        card.className = 'producto';
+        card.innerHTML = `
+          <img src="${img}" alt="${p.Nombre}" onerror="this.src='https://via.placeholder.com/300x160?text=Pizza'">
+          <div class="producto-body">
+            <h3>${p.Nombre}</h3>
+            <p class="desc">${p.Descripcion || ''}</p>
+            <p class="ingredientes">${p.Ingredientes || ''}</p>
+            <p class="precio">$${Number(p.Precio).toFixed(2)}</p>
+            <button onclick="agregarAlCarrito('${p.ID}')">+ Agregar</button>
+          </div>
+        `;
+        cont.appendChild(card);
+      });
+    }
+
+    // ============================================
+    // 2. GESTIÓN DEL CARRITO
+    // ============================================
+    function agregarAlCarrito(id) {
+      const p = productos.find(x => String(x.ID) === String(id));
+      if (!p) return;
+      if (carrito[id]) {
+        carrito[id].cantidad++;
+      } else {
+        carrito[id] = { producto: p, cantidad: 1 };
+      }
+      renderCarrito();
+    }
+
+    function cambiarCantidad(id, delta) {
+      if (!carrito[id]) return;
+      carrito[id].cantidad += delta;
+      if (carrito[id].cantidad <= 0) delete carrito[id];
+      renderCarrito();
+    }
+
+    function renderCarrito() {
+      const cont = document.getElementById('carrito-items');
+      const ids = Object.keys(carrito);
+
+      if (ids.length === 0) {
+        cont.innerHTML = '<p class="carrito-vacio">El carrito está vacío</p>';
+        document.getElementById('total').textContent = '$0.00';
+        document.getElementById('btn-pagar').disabled = true;
+        return;
+      }
+
+      let total = 0;
+      let html = '';
+      ids.forEach(id => {
+        const item = carrito[id];
+        const subtotal = item.producto.Precio * item.cantidad;
+        total += subtotal;
+        html += `
+          <div class="carrito-item">
+            <div>
+              <strong>${item.producto.Nombre}</strong><br>
+              <small>$${Number(item.producto.Precio).toFixed(2)} c/u</small>
+            </div>
+            <div class="controles">
+              <button onclick="cambiarCantidad('${id}', -1)">−</button>
+              <span>${item.cantidad}</span>
+              <button onclick="cambiarCantidad('${id}', 1)">+</button>
+            </div>
+          </div>
+        `;
+      });
+
+      cont.innerHTML = html;
+      document.getElementById('total').textContent = '$' + total.toFixed(2);
+      document.getElementById('btn-pagar').disabled = false;
+    }
+
+    // ============================================
+    // 3. PROCESAR PEDIDO (envía a Apps Script)
+    // ============================================
+    function procesarPedido() {
+      const nombre = document.getElementById('nombre').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+      const msg = document.getElementById('mensaje');
+
+      if (!nombre || !email) {
+        mostrarMensaje('Por favor, completa tu nombre y email.', 'error');
+        return;
+      }
+
+      const items = Object.keys(carrito).map(id => ({
+        id: id,
+        cantidad: carrito[id].cantidad
+      }));
+
+      if (items.length === 0) {
+        mostrarMensaje('Tu carrito está vacío.', 'error');
+        return;
+      }
+
+      document.getElementById('btn-pagar').disabled = true;
+      document.getElementById('btn-pagar').textContent = 'Procesando...';
+
+      // Enviamos los datos con JSONP (Apps Script no soporta CORS)
+      const callbackName = 'callbackPedido_' + Date.now();
+      window[callbackName] = function(respuesta) {
+        document.getElementById('btn-pagar').disabled = false;
+        document.getElementById('btn-pagar').textContent = 'Pagar y Enviar Pedido';
+
+        if (respuesta.success && respuesta.paymentUrl) {
+          mostrarMensaje('¡Pedido registrado! Redirigiendo al pago...', 'ok');
+          window.location.href = respuesta.paymentUrl;
+        } else {
+          mostrarMensaje('Error: ' + (respuesta.error || 'No se pudo procesar el pedido.'), 'error');
+        }
+        delete window[callbackName];
+      };
+
+      const params = new URLSearchParams({
+        action: 'processOrder',
+        callback: callbackName,
+        items: JSON.stringify(items),
+        nombre: nombre,
+        email: email,
+        telefono: telefono,
+        direccion: direccion
+      });
+
+      const script = document.createElement('script');
+      script.src = APPS_SCRIPT_URL + '?' + params.toString();
+      document.body.appendChild(script);
+    }
+
+    function mostrarMensaje(texto, tipo) {
+      const msg = document.getElementById('mensaje');
+      msg.textContent = texto;
+      msg.className = 'mensaje ' + tipo;
+    }
+
+    // ============================================
+    // INICIO
+    // ============================================
+    window.addEventListener('DOMContentLoaded', cargarProductos);
+  </script>
+</body>
+</html>
