@@ -328,7 +328,7 @@
   </div>
 
   <!-- Botón Flotante de WhatsApp -->
-  <a href="https://wa.me/34601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
+  <a href="https://wa.me/346601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
      target="_blank"
      rel="noopener noreferrer"
      aria-label="Contactar por WhatsApp"
@@ -342,14 +342,13 @@
     // ============================================
     // ⚙️ CONFIGURACIÓN - REEMPLAZA CON TU URL
     // ============================================
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOjB0U20gIvhKIbDIW6JSbePrAYtZbda90C_AaoPSavFDwTjBlIHOfY7vlk_1zTjMA9w/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec';
 
     // ============================================
     // CONSTANTES Y ESTADO GLOBAL
     // ============================================
     const MONEDA = '€';
 
-    // Placeholder declarado arriba para evitar ReferenceError
     const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160">' +
       '<rect width="100%" height="100%" fill="#f1f1f1"/>' +
@@ -370,16 +369,11 @@
 
     let contadorCb = 0;
 
-    /** Nombre único para cada callback JSONP (evita colisiones si se piden dos a la vez). */
     function nombreCb(prefijo) {
       contadorCb += 1;
       return prefijo + '_' + Date.now() + '_' + contadorCb;
     }
 
-    /**
-     * Lanza una petición JSONP y ejecuta onData(data) al recibir respuesta.
-     * Limpia el callback y el <script> del DOM automáticamente.
-     */
     function jsonp(action, onData, onError) {
       const cb = nombreCb('cb_' + action);
       const script = document.createElement('script');
@@ -409,7 +403,6 @@
       });
     }
 
-    // Convierte 12 / "12" / "12,50" / "$12.50" / "1.234,56" en número
     function precioNum(valor) {
       if (typeof valor === 'number') return isFinite(valor) ? valor : 0;
       let s = String(valor == null ? '' : valor).replace(/[^\d.,-]/g, '');
@@ -425,7 +418,6 @@
       return isNaN(n) ? 0 : n;
     }
 
-    // La hoja puede traer "si"/true/"Disponible"
     function esVisible(p) {
       const d = p.Disponible;
       if (d === undefined || d === null || d === '') return true;
@@ -434,7 +426,6 @@
       return t === 'si' || t === 'sí' || t === 'true' || t === 'verdadero' || t === '1';
     }
 
-    // Devuelve las URLs de imagen (soporta "ImagenURL" e "Imagen")
     function imagenesDe(p) {
       const raw = p.ImagenURL || p.Imagen || '';
       return String(raw).split(',').map(function (u) { return u.trim(); }).filter(function (u) { return u !== ''; });
@@ -452,11 +443,10 @@
       });
     }
 
-    // Lee si el pago con tarjeta está activo (para no intentar cobrar si está apagado)
     function cargarConfig() {
       jsonp('getConfig', function (data) {
         stripeHabilitado = !!(data && (data.StripeHabilitado === true || String(data.StripeHabilitado).toLowerCase() === 'true'));
-      }, function () { /* silencioso */ });
+      }, function () {});
     }
 
     // ============================================
@@ -469,7 +459,7 @@
     function cargarSlider() {
       jsonp('getSlider', function (data) {
         mostrarSlider(Array.isArray(data) ? data : []);
-      }, function () { /* si falla, simplemente no se muestra */ });
+      }, function () {});
     }
 
     function mostrarSlider(lista) {
@@ -574,7 +564,6 @@
         let imagenes;
 
         if (urls.length > 1) {
-          // Carrusel deslizable para varias fotos
           imagenes =
             '<div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:5px;padding-bottom:5px;scrollbar-width:none;">' +
             urls.map(function (url) {
@@ -660,7 +649,7 @@
     }
 
     // ============================================
-    // 3. PROCESAR PEDIDO (envía a Apps Script)
+    // 3. PROCESAR PEDIDO
     // ============================================
     function procesarPedido() {
       const nombre = document.getElementById('nombre').value.trim();
@@ -713,6 +702,15 @@
           return;
         }
 
+        // --- NUEVO: Detectar si es el aviso de pedido duplicado ---
+        if (!respuesta.success && respuesta.error && respuesta.error.indexOf('ya se ha registrado') !== -1) {
+          mostrarMensaje(respuesta.error, 'ok'); // Se muestra en verde
+          carrito = {};
+          renderCarrito();
+          restaurarBoton();
+          return;
+        }
+
         if (respuesta.success && respuesta.paymentUrl) {
           mostrarMensaje('¡Pedido registrado! Redirigiendo al pago...', 'ok');
           window.location.href = respuesta.paymentUrl;
@@ -720,7 +718,6 @@
         }
 
         if (respuesta.success) {
-          // Pedido guardado sin cobro online (Stripe desactivado)
           mostrarMensaje(respuesta.message || '¡Pedido registrado! Nos pondremos en contacto para el pago.', 'ok');
           carrito = {};
           renderCarrito();
