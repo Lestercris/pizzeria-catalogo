@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍕 Panel de Control - Pizzeria-HR</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>🍕 Panel de Control - Hermanos Rivas</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-    
-    body { 
+
+    body {
       background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
       min-height: 100vh;
       display: flex;
@@ -17,10 +18,10 @@
       padding: 20px;
     }
 
-    .card { 
-      background: white; 
-      padding: 40px; 
-      border-radius: 20px; 
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
       box-shadow: 0 15px 35px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 500px;
@@ -28,7 +29,6 @@
       overflow: hidden;
     }
 
-    /* Línea decorativa superior */
     .card::before {
       content: '';
       position: absolute;
@@ -37,10 +37,10 @@
       background: linear-gradient(90deg, #c0392b, #e74c3c);
     }
 
-    h2 { 
-      color: #2c3e50; 
-      font-size: 24px; 
-      margin-bottom: 10px; 
+    h2 {
+      color: #2c3e50;
+      font-size: 24px;
+      margin-bottom: 10px;
       text-align: center;
     }
 
@@ -60,12 +60,12 @@
       margin-bottom: 8px;
     }
 
-    input, select { 
-      width: 100%; 
-      padding: 14px; 
-      margin-bottom: 20px; 
-      border: 2px solid #ecf0f1; 
-      border-radius: 10px; 
+    input, select {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 20px;
+      border: 2px solid #ecf0f1;
+      border-radius: 10px;
       font-size: 15px;
       transition: all 0.3s ease;
       background: #f8f9fa;
@@ -78,37 +78,39 @@
       box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
     }
 
-    button { 
-      background: #c0392b; 
-      color: white; 
-      border: none; 
-      padding: 15px; 
-      width: 100%; 
-      border-radius: 10px; 
-      cursor: pointer; 
-      font-size: 16px; 
+    input:disabled { opacity: .6; cursor: not-allowed; }
+
+    button {
+      background: #c0392b;
+      color: white;
+      border: none;
+      padding: 15px;
+      width: 100%;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
       font-weight: 600;
       transition: background 0.3s, transform 0.1s;
     }
 
     button:hover { background: #a93226; }
     button:active { transform: scale(0.98); }
+    button:disabled { background: #bdc3c7; cursor: not-allowed; }
 
     .hidden { display: none !important; }
-    
-    .msg { 
-      margin-top: 15px; 
-      padding: 12px; 
-      border-radius: 8px; 
+
+    .msg {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
       font-size: 14px;
-      display: none; 
+      display: none;
       text-align: center;
       font-weight: 500;
     }
     .msg.ok { background: #d4edda; color: #155724; display: block; }
     .msg.error { background: #f8d7da; color: #721c24; display: block; }
 
-    /* Estilos para la galería */
     .galeria-admin { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
     .img-item { position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid #ecf0f1; }
     .img-item img { width: 100%; height: 100%; object-fit: cover; }
@@ -117,26 +119,125 @@
     .input-group input { margin-bottom: 0; }
     .btn-small { width: auto; padding: 0 15px; background: #27ae60; white-space: nowrap; }
     .btn-small:hover { background: #219150; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .topbar h2 { text-align: left; margin: 0; font-size: 20px; }
+    .btn-salir {
+      width: auto;
+      padding: 9px 14px;
+      background: #ecf0f1;
+      color: #34495e;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+    .btn-salir:hover { background: #dfe6e9; }
+
+    .aviso {
+      background: #fff9e6;
+      border-left: 4px solid #f1c40f;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      color: #7d6608;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Gestor del slider de portada */
+    .slide-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      border-radius: 10px;
+      padding: 8px;
+    }
+    .slide-item img {
+      width: 84px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #eee;
+      flex: 0 0 auto;
+    }
+    .slide-item .campos {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .slide-item .campos input {
+      margin: 0;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+    .slide-item .chk {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #7f8c8d;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    .slide-item .chk input { width: 14px; height: 14px; margin: 0; }
+    .slide-item .acciones {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 0 0 auto;
+    }
+    .slide-item .acciones button {
+      width: 28px;
+      height: 24px;
+      padding: 0;
+      margin: 0;
+      font-size: 12px;
+      line-height: 1;
+      background: #ecf0f1;
+      color: #2c3e50;
+      border: 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .slide-item .acciones button:hover { background: #dfe6e8; }
+    .slide-item .acciones button.del { background: #fdecea; color: #c0392b; }
+    .slide-item .acciones button:disabled { opacity: 0.35; cursor: default; }
   </style>
 </head>
 <body>
 
 <!-- PANTALLA DE LOGIN -->
 <div class="card" id="login-section">
-  <h2>🍕Pizzeria-HR</h2>
+  <h2>🍕 Hermanos Rivas</h2>
   <p class="subtitle">Bienvenido al centro de control.<br>Gestiona tu menú, precios y configuración de pagos.</p>
-  
-  <label>Contraseña de Administrador</label>
-  <input type="password" id="admin-pass" placeholder="Ingresa tu contraseña segura">
-  
-  <button onclick="login()">Acceder al Panel</button>
-  <div id="login-msg" class="msg error"></div>
+
+  <label for="admin-pass">Contraseña de Administrador</label>
+  <input type="password" id="admin-pass" placeholder="Ingresa tu contraseña segura" autocomplete="current-password">
+
+  <button id="btn-login" onclick="login()">Acceder al Panel</button>
+  <div id="login-msg" class="msg"></div>
 </div>
 
 <!-- PANEL DE ADMINISTRACIÓN -->
 <div class="card hidden" id="panel-section" style="max-width: 700px;">
-  <h2>⚙️ Gestión de Productos</h2>
+  <div class="topbar">
+    <h2>⚙️ Gestión de Productos</h2>
+    <button class="btn-salir" onclick="salir()">Cerrar sesión</button>
+  </div>
   <p class="subtitle">Actualiza la información y las fotos de tu catálogo en tiempo real.</p>
+
+  <div class="aviso">
+    La sesión caduca sola a las 2 horas. Si ves errores de sesión, vuelve a entrar.
+  </div>
 
   <!-- INTERRUPTOR DE STRIPE -->
   <div style="margin-bottom: 25px; padding: 20px; background: #e8f4f8; border-left: 5px solid #3498db; border-radius: 8px;">
@@ -148,32 +249,49 @@
     <p style="font-size: 12px; color: #7f8c8d; margin-left: 30px;">Si está desactivado, los clientes coordinarán el pago por WhatsApp.</p>
   </div>
 
-  <label>Seleccionar Producto para Editar:</label>
+  <!-- SLIDER DE PORTADA -->
+  <div style="margin-bottom: 25px; padding: 20px; background: #fdf6ec; border-left: 5px solid #e67e22; border-radius: 8px;">
+    <h3 style="margin-top:0; font-size: 16px; color: #d35400;">🖼️ Imágenes de Portada (Slider)</h3>
+    <p style="font-size: 12px; color: #7f8c8d; margin-top: 0; margin-bottom: 14px;">
+      Se muestran justo debajo del título de la web. Usa las flechas para cambiar el orden. Máximo 10.
+    </p>
+
+    <div id="slider-lista" style="display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+      <button id="btn-add-slide" class="btn-small" type="button" onclick="agregarSlide()">+ Añadir imagen</button>
+      <button class="btn-small" type="button" onclick="pedirFoto('slider')" style="background: #3498db;">📷 Subir fotos</button>
+      <button id="btn-slider" class="btn-small" type="button" onclick="guardarSlider()" style="background: #e67e22;">Guardar slider</button>
+    </div>
+    <div id="slider-msg" class="msg"></div>
+  </div>
+
+  <label for="select-product">Seleccionar Producto para Editar:</label>
   <select id="select-product" onchange="cargarProducto()">
     <option value="">-- Crear Nuevo Producto --</option>
   </select>
 
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
     <div>
-      <label>ID del Producto</label>
-      <input type="text" id="p-id" placeholder="Ej. P07" required>
+      <label for="p-id">ID del Producto</label>
+      <input type="text" id="p-id" placeholder="Ej. P07" maxlength="20" required>
     </div>
     <div>
-      <label>Precio (€)</label>
-      <input type="number" id="p-precio" placeholder="Ej. 12.50" step="0.01" required>
+      <label for="p-precio">Precio (€)</label>
+      <input type="text" id="p-precio" placeholder="Ej. 12.50" inputmode="decimal" maxlength="12" required>
     </div>
   </div>
 
-  <label>Nombre del Producto</label>
-  <input type="text" id="p-nombre" placeholder="Ej. Pizza Barbacoa" required>
+  <label for="p-nombre">Nombre del Producto</label>
+  <input type="text" id="p-nombre" placeholder="Ej. Pizza Barbacoa" maxlength="80" required>
 
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
     <div>
-      <label>Categoría</label>
-      <input type="text" id="p-categoria" placeholder="Ej. Pizzas" value="Pizzas">
+      <label for="p-categoria">Categoría</label>
+      <input type="text" id="p-categoria" placeholder="Ej. Pizzas" value="Pizzas" maxlength="40">
     </div>
     <div>
-      <label>Disponible en la Web</label>
+      <label for="p-disponible">Disponible en la Web</label>
       <select id="p-disponible">
         <option value="si">Sí, mostrar en el catálogo</option>
         <option value="no">No, ocultar temporalmente</option>
@@ -181,131 +299,649 @@
     </div>
   </div>
 
-  <label>Descripción corta</label>
-  <input type="text" id="p-desc" placeholder="Ej. Deliciosa pizza con carne y bacon">
+  <label for="p-desc">Descripción corta</label>
+  <input type="text" id="p-desc" placeholder="Ej. Deliciosa pizza con carne y bacon" maxlength="300">
 
-  <label>Ingredientes</label>
-  <input type="text" id="p-ingredientes" placeholder="Ej. Tomate, mozzarella, carne, bacon">
+  <label for="p-ingredientes">Ingredientes</label>
+  <input type="text" id="p-ingredientes" placeholder="Ej. Tomate, mozzarella, carne, bacon" maxlength="300">
 
   <!-- GESTOR DE CARRUSEL -->
   <div style="border: 2px dashed #bdc3c7; padding: 20px; border-radius: 12px; background: #f8f9fa; margin-bottom: 25px;">
     <h3 style="margin-top:0; font-size: 15px; color: #2c3e50; margin-bottom: 15px;">📸 Galería de Imágenes</h3>
     <div class="galeria-admin" id="galeria-imagenes"></div>
-    
+
     <div class="input-group">
-      <input type="url" id="nueva-imagen-url" placeholder="https://ejemplo.com/foto.jpg">
+      <input type="url" id="nueva-imagen-url" placeholder="https://ejemplo.com/foto.jpg" maxlength="500">
       <button class="btn-small" onclick="agregarImagen()">Añadir Foto</button>
+      <button class="btn-small" type="button" onclick="pedirFoto('producto')" style="background: #3498db;" title="Subir desde el móvil">📷</button>
     </div>
   </div>
-  
-  <button onclick="guardarProducto()" style="background: #27ae60;">Guardar Cambios del Producto</button>
+
+  <button id="btn-guardar" onclick="guardarProducto()" style="background: #27ae60;">Guardar Cambios del Producto</button>
   <div id="panel-msg" class="msg"></div>
 </div>
 
 <script>
-  // ⚠️ REEMPLAZA ESTO CON TU URL DE APPS SCRIPT
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec'; 
-  
-  let productosGlobal = [];
-  let passwordAdmin = '';
-  let imagenesActuales = [];
+  // ============================================
+  // ⚙️ CONFIGURACIÓN
+  // ============================================
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec';
+  const CLAVE_TOKEN = 'hr_adm_token';
 
+  let productosGlobal = [];
+  let tokenAdmin = '';
+  let imagenesActuales = [];
+  let sliderItems = [];
+
+  // ============================================
+  // PUENTE JSONP
+  // ============================================
   function jsonpRequest(params) {
-    return new Promise((resolve, reject) => {
-      const cb = 'cb_' + Date.now();
-      window[cb] = (data) => {
-        delete window[cb];
-        if (document.body.contains(script)) document.body.removeChild(script);
+    return new Promise(function (resolve, reject) {
+      const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+      let script = null;
+      let terminado = false;
+
+      function limpiar() {
+        if (terminado) return;
+        terminado = true;
+        try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+        if (script && script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cb] = function (data) {
+        limpiar();
         resolve(data);
       };
-      const query = new URLSearchParams({ ...params, callback: cb }).toString();
-      const script = document.createElement('script');
+
+      const query = new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+      script = document.createElement('script');
       script.src = APPS_SCRIPT_URL + '?' + query;
-      script.onerror = () => { 
-        delete window[cb]; 
-        if (document.body.contains(script)) document.body.removeChild(script);
-        reject(new Error('Network error')); 
+      script.onerror = function () {
+        limpiar();
+        reject(new Error('No se pudo conectar con el servidor.'));
       };
       document.body.appendChild(script);
+
+      setTimeout(function () {
+        if (!terminado) {
+          limpiar();
+          reject(new Error('El servidor tardó demasiado en responder.'));
+        }
+      }, 20000);
     });
   }
 
+  function guardarToken(t) {
+    tokenAdmin = t || '';
+    try {
+      if (tokenAdmin) sessionStorage.setItem(CLAVE_TOKEN, tokenAdmin);
+      else sessionStorage.removeItem(CLAVE_TOKEN);
+    } catch (e) { }
+  }
+
+  function leerToken() {
+    try { return sessionStorage.getItem(CLAVE_TOKEN) || ''; } catch (e) { return ''; }
+  }
+
+  function mostrarMsg(id, texto, tipo) {
+    const el = document.getElementById(id);
+    el.textContent = texto;
+    el.className = 'msg ' + tipo;
+  }
+
+  function ocultarMsg(id) {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    el.className = 'msg';
+  }
+
+  /** Si el backend dice que la sesión no vale, volvemos al login. */
+  function sesionInvalida(res) {
+    return !!(res && res.success === false && /sesi[oó]n/i.test(res.error || ''));
+  }
+
+  /** Acepta 12 / 12.5 / "12,50" / "1.234,56" y devuelve número (o NaN). */
+  function precioNum(valor) {
+    let s = String(valor === null || valor === undefined ? '' : valor).replace(/[^\d.,-]/g, '');
+    if (!s) return NaN;
+    if (s.indexOf(',') > -1 && s.indexOf('.') > -1) {
+      s = s.lastIndexOf(',') > s.lastIndexOf('.')
+        ? s.replace(/\./g, '').replace(',', '.')
+        : s.replace(/,/g, '');
+    } else {
+      s = s.replace(',', '.');
+    }
+    const n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  }
+
+  /** SHA-256 en hexadecimal con Web Crypto (necesita https o localhost). */
+  async function sha256Hex(texto) {
+    if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
+      throw new Error('Tu navegador bloquea el acceso seguro. Abre la página con https://');
+    }
+    const datos = new TextEncoder().encode(String(texto));
+    const hash = await window.crypto.subtle.digest('SHA-256', datos);
+    return Array.prototype.map.call(new Uint8Array(hash), function (b) {
+      return b.toString(16).padStart(2, '0');
+    }).join('');
+  }
+
+  // ============================================
+  // LOGIN / LOGOUT
+  // ============================================
   async function login() {
-    passwordAdmin = document.getElementById('admin-pass').value;
-    const btn = document.querySelector('#login-section button');
+    const pass = document.getElementById('admin-pass').value;
+    const btn = document.getElementById('btn-login');
+
+    if (!pass) {
+      mostrarMsg('login-msg', 'Escribe tu contraseña.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
     btn.textContent = 'Conectando...';
+    ocultarMsg('login-msg');
 
     try {
-      const res = await jsonpRequest({ action: 'getProducts' });
-      
-      // Si llega aquí, la conexión fue exitosa
-      document.getElementById('login-section').classList.add('hidden');
-      document.getElementById('panel-section').classList.remove('hidden');
-      productosGlobal = res;
-      
-      const select = document.getElementById('select-product');
-      select.innerHTML = '<option value="">-- Crear Nuevo Producto --</option>';
-      res.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.ID;
-        opt.textContent = p.ID + ' - ' + p.Nombre;
-        select.appendChild(opt);
+      // 1) Pedimos un desafío de un solo uso
+      const desafio = await jsonpRequest({ action: 'challenge' });
+      if (!desafio || !desafio.success || !desafio.nonce) {
+        throw new Error((desafio && desafio.error) || 'No se pudo iniciar el acceso.');
+      }
+
+      // 2) Calculamos la respuesta en el navegador. La contraseña NO se envía.
+      const huella = await sha256Hex(pass);
+      const respuesta = await sha256Hex(desafio.nonce + ':' + huella);
+
+      // 3) Enviamos solo el hash del desafío
+      const res = await jsonpRequest({
+        action: 'login',
+        nonce: desafio.nonce,
+        respuesta: respuesta
       });
-      
-      cargarConfig();
+
+      document.getElementById('admin-pass').value = '';
+
+      if (!res || !res.success || !res.token) {
+        mostrarMsg('login-msg', (res && res.error) || 'No se pudo iniciar sesión.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Acceder al Panel';
+        return;
+      }
+
+      guardarToken(res.token);
+      await entrarAlPanel();
+
+      btn.disabled = false;
+      btn.textContent = 'Acceder al Panel';
     } catch (e) {
-      document.getElementById('login-msg').textContent = 'Error de conexión. Verifica que la URL de Apps Script sea correcta.';
+      document.getElementById('admin-pass').value = '';
+      mostrarMsg('login-msg', e.message || 'Error de conexión.', 'error');
+      btn.disabled = false;
       btn.textContent = 'Acceder al Panel';
     }
   }
 
+  async function entrarAlPanel() {
+    const res = await jsonpRequest({ action: 'getAdminData', token: tokenAdmin });
+
+    if (!res || !res.success) {
+      guardarToken('');
+      throw new Error((res && res.error) || 'Sesión no válida.');
+    }
+
+    productosGlobal = res.products || [];
+
+    document.getElementById('login-section').classList.add('hidden');
+    document.getElementById('panel-section').classList.remove('hidden');
+
+    const select = document.getElementById('select-product');
+    select.innerHTML = '<option value="">-- Crear Nuevo Producto --</option>';
+    productosGlobal.forEach(function (p) {
+      const opt = document.createElement('option');
+      opt.value = p.ID;
+      opt.textContent = p.ID + ' - ' + p.Nombre;
+      select.appendChild(opt);
+    });
+
+    if (res.config) {
+      document.getElementById('config-stripe').checked = !!res.config.StripeHabilitado;
+    }
+
+    sliderItems = Array.isArray(res.slider) ? res.slider : [];
+    renderizarSlider();
+
+    ocultarMsg('panel-msg');
+    ocultarMsg('slider-msg');
+  }
+
+  // ============================================
+  // SLIDER DE PORTADA
+  // ============================================
+  const IMG_VACIA = 'data:image/svg+xml;charset=utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="84" height="56">' +
+    '<rect width="84" height="56" fill="#e9e9e9"/>' +
+    '<text x="42" y="32" font-size="9" fill="#aaa" text-anchor="middle">sin imagen</text></svg>'
+  );
+
+  function miniatura(img, url) {
+    if (!url) { img.src = IMG_VACIA; return; }
+    img.onerror = function () { this.onerror = null; this.src = IMG_VACIA; };
+    img.src = url;
+  }
+
+  function renderizarSlider() {
+    const cont = document.getElementById('slider-lista');
+    if (!cont) return;
+    cont.innerHTML = '';
+
+    document.getElementById('btn-add-slide').disabled = sliderItems.length >= 10;
+
+    if (!sliderItems.length) {
+      cont.innerHTML = '<p style="font-size:12px;color:#95a5a6;margin:0;">No hay imágenes. La sección no aparecerá en la web.</p>';
+      return;
+    }
+
+    sliderItems.forEach(function (item, i) {
+      const fila = document.createElement('div');
+      fila.className = 'slide-item';
+
+      const img = document.createElement('img');
+      img.alt = '';
+      miniatura(img, item.URL);
+      fila.appendChild(img);
+
+      const campos = document.createElement('div');
+      campos.className = 'campos';
+
+      const url = document.createElement('input');
+      url.type = 'text';
+      url.placeholder = 'https://... o img/foto.jpg';
+      url.maxLength = 500;
+      url.value = item.URL || '';
+      url.onchange = function () {
+        item.URL = url.value.trim();
+        miniatura(img, item.URL);
+      };
+      campos.appendChild(url);
+
+      const titulo = document.createElement('input');
+      titulo.type = 'text';
+      titulo.placeholder = 'Título (opcional)';
+      titulo.maxLength = 80;
+      titulo.value = item.Titulo || '';
+      titulo.oninput = function () { item.Titulo = titulo.value; };
+      campos.appendChild(titulo);
+
+      const chk = document.createElement('label');
+      chk.className = 'chk';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = item.Activo !== false;
+      box.onchange = function () { item.Activo = box.checked; };
+      chk.appendChild(box);
+      chk.appendChild(document.createTextNode('Visible en la web'));
+      campos.appendChild(chk);
+
+      fila.appendChild(campos);
+
+      const acciones = document.createElement('div');
+      acciones.className = 'acciones';
+
+      const arriba = document.createElement('button');
+      arriba.type = 'button';
+      arriba.textContent = '↑';
+      arriba.title = 'Subir';
+      arriba.disabled = i === 0;
+      arriba.onclick = function () { moverSlide(i, -1); };
+
+      const abajo = document.createElement('button');
+      abajo.type = 'button';
+      abajo.textContent = '↓';
+      abajo.title = 'Bajar';
+      abajo.disabled = i === sliderItems.length - 1;
+      abajo.onclick = function () { moverSlide(i, 1); };
+
+      const borrar = document.createElement('button');
+      borrar.type = 'button';
+      borrar.className = 'del';
+      borrar.textContent = '✕';
+      borrar.title = 'Eliminar';
+      borrar.onclick = function () { eliminarSlide(i); };
+
+      acciones.appendChild(arriba);
+      acciones.appendChild(abajo);
+      acciones.appendChild(borrar);
+      fila.appendChild(acciones);
+
+      cont.appendChild(fila);
+    });
+  }
+
+  function agregarSlide() {
+    if (sliderItems.length >= 10) {
+      mostrarMsg('slider-msg', 'Máximo 10 imágenes.', 'error');
+      return;
+    }
+    sliderItems.push({ ID: '', URL: '', Titulo: '', Activo: true });
+    renderizarSlider();
+
+    const inputs = document.querySelectorAll('#slider-lista .campos input[type="text"]');
+    if (inputs.length >= 2) inputs[inputs.length - 2].focus();
+  }
+
+  function moverSlide(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= sliderItems.length) return;
+    const tmp = sliderItems[i];
+    sliderItems[i] = sliderItems[j];
+    sliderItems[j] = tmp;
+    renderizarSlider();
+  }
+
+  function eliminarSlide(i) {
+    sliderItems.splice(i, 1);
+    renderizarSlider();
+    ocultarMsg('slider-msg');
+  }
+
+  /** Convierte enlaces de "compartir" de Drive en una URL de imagen directa. */
+  function normalizarUrlImagen(url) {
+    const u = String(url || '').trim();
+    const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
+    if (m) return 'https://lh3.googleusercontent.com/d/' + m[1] + '=w1600';
+    return u;
+  }
+
+  async function guardarSlider() {
+    ocultarMsg('slider-msg');
+
+    for (let i = 0; i < sliderItems.length; i++) {
+      sliderItems[i].URL = normalizarUrlImagen(sliderItems[i].URL);
+      if (!sliderItems[i].URL) {
+        mostrarMsg('slider-msg', 'La imagen ' + (i + 1) + ' no tiene URL.', 'error');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('btn-slider');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+      const res = await jsonpRequest({
+        action: 'saveSlider',
+        token: tokenAdmin,
+        sliderData: JSON.stringify(sliderItems)
+      });
+
+      if (sesionInvalida(res)) {
+        await salir();
+        mostrarMsg('login-msg', 'Tu sesión caducó. Vuelve a entrar.', 'error');
+        return;
+      }
+
+      if (!res || !res.success) throw new Error((res && res.error) || 'No se pudo guardar el slider.');
+
+      sliderItems = Array.isArray(res.slider) ? res.slider : [];
+      renderizarSlider();
+      mostrarMsg('slider-msg', '✅ Slider guardado. Recarga la web para verlo.', 'ok');
+    } catch (e) {
+      mostrarMsg('slider-msg', e.message || 'Error de conexión.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar slider';
+    }
+  }
+
+  // ============================================
+  // SUBIDA DE FOTOS A DRIVE
+  // ============================================
+  let destinoSubida = 'slider';
+
+  function pedirFoto(destino) {
+    destinoSubida = destino;
+    const input = document.getElementById('subida-archivo');
+    input.value = '';
+    input.click();
+  }
+
+  function uuidV4() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  /** Reduce la foto para que suba rápido y no pese (máx. 1600 px de lado). */
+  async function comprimirImagen(archivo, maxLado, calidad) {
+    maxLado = maxLado || 1600;
+    calidad = calidad || 0.85;
+
+    if (!/^image\//.test(archivo.type || '')) {
+      throw new Error('Ese archivo no es una imagen.');
+    }
+    // Los GIF animados se envían tal cual para no perder la animación
+    if (archivo.type === 'image/gif') return archivo;
+
+    try {
+      const url = URL.createObjectURL(archivo);
+      const img = new Image();
+
+      await new Promise(function (res, rej) {
+        img.onload = res;
+        img.onerror = rej;
+        img.src = url;
+      });
+
+      URL.revokeObjectURL(url);
+
+      const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
+      const ancho = Math.max(1, Math.round(img.width * escala));
+      const alto = Math.max(1, Math.round(img.height * escala));
+
+      const lienzo = document.createElement('canvas');
+      lienzo.width = ancho;
+      lienzo.height = alto;
+      lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
+
+      const reducida = await new Promise(function (res) {
+        lienzo.toBlob(res, 'image/jpeg', calidad);
+      });
+
+      if (!reducida) return archivo;
+
+      const nombre = (archivo.name || 'foto').replace(/\.[^.]+$/, '') + '.jpg';
+      return new File([reducida], nombre, { type: 'image/jpeg' });
+    } catch (e) {
+      // Formatos que el navegador no sabe dibujar (p. ej. HEIC): se sube el original
+      return archivo;
+    }
+  }
+
+  /**
+   * Envía la foto con un formulario oculto (los formularios no fallan por CORS)
+   * y espera el resultado consultando el servidor.
+   */
+  function subirArchivo(archivo) {
+    return new Promise(function (resolve, reject) {
+      if (!tokenAdmin) { reject(new Error('Tu sesión caducó. Vuelve a entrar.')); return; }
+
+      const id = uuidV4();
+      const form = document.getElementById('form-subida');
+      const input = document.getElementById('subida-archivo');
+
+      document.getElementById('subida-token').value = tokenAdmin;
+      document.getElementById('subida-id').value = id;
+
+      try {
+        const dt = new DataTransfer();
+        dt.items.add(new File([archivo], archivo.name || 'foto.jpg', { type: archivo.type || 'image/jpeg' }));
+        input.files = dt.files;
+      } catch (e) {
+        reject(new Error('Tu navegador no permite subir la foto. Usa el enlace manual.'));
+        return;
+      }
+
+      form.action = APPS_SCRIPT_URL;
+      form.submit();
+
+      let intentos = 0;
+      const temporizador = setInterval(async function () {
+        intentos++;
+
+        if (intentos > 60) {
+          clearInterval(temporizador);
+          reject(new Error('La subida tardó demasiado. Comprueba tu conexión.'));
+          return;
+        }
+
+        try {
+          const res = await jsonpRequest({ action: 'uploadStatus', id: id });
+          if (res && res.success === true && res.url) {
+            clearInterval(temporizador);
+            resolve(res.url);
+          } else if (res && res.success === false) {
+            clearInterval(temporizador);
+            reject(new Error(res.error || 'No se pudo subir la foto.'));
+          }
+        } catch (e) {
+          // seguimos intentando
+        }
+      }, 1500);
+    });
+  }
+
+  async function procesarFotos(input) {
+    const archivos = Array.prototype.slice.call(input.files || []);
+    input.value = '';
+    if (!archivos.length) return;
+
+    const esSlider = destinoSubida === 'slider';
+    const msgId = esSlider ? 'slider-msg' : 'panel-msg';
+    const limite = esSlider ? 10 : 8;
+
+    for (let i = 0; i < archivos.length; i++) {
+      const cuantas = esSlider ? sliderItems.length : imagenesActuales.length;
+      if (cuantas >= limite) {
+        mostrarMsg(msgId, 'Máximo ' + limite + ' fotos.', 'error');
+        break;
+      }
+
+      try {
+        mostrarMsg(msgId, '⏳ Subiendo ' + (i + 1) + ' de ' + archivos.length + '...', 'ok');
+
+        const reducida = await comprimirImagen(archivos[i]);
+        const url = await subirArchivo(reducida);
+
+        if (esSlider) {
+          sliderItems.push({ ID: '', URL: url, Titulo: '', Activo: true });
+          renderizarSlider();
+          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar slider" para publicarla.', 'ok');
+        } else {
+          imagenesActuales.push(url);
+          renderizarGaleria();
+          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar Cambios del Producto" para publicarla.', 'ok');
+        }
+      } catch (e) {
+        mostrarMsg(msgId, e.message || 'No se pudo subir la foto.', 'error');
+      }
+    }
+  }
+
+  async function salir() {
+    const t = tokenAdmin;
+    guardarToken('');
+    document.getElementById('panel-section').classList.add('hidden');
+    document.getElementById('login-section').classList.remove('hidden');
+    ocultarMsg('panel-msg');
+    ocultarMsg('slider-msg');
+    sliderItems = [];
+    if (t) {
+      try { await jsonpRequest({ action: 'logout', token: t }); } catch (e) { }
+    }
+  }
+
+  // Restaurar sesión al recargar
+  window.addEventListener('DOMContentLoaded', async function () {
+    const guardado = leerToken();
+    if (!guardado) return;
+
+    tokenAdmin = guardado;
+    try {
+      await entrarAlPanel();
+    } catch (e) {
+      guardarToken('');
+    }
+  });
+
+  // ============================================
+  // FORMULARIO DE PRODUCTO
+  // ============================================
   function cargarProducto() {
     const id = document.getElementById('select-product').value;
+
     if (!id) {
       document.getElementById('p-id').value = '';
       document.getElementById('p-nombre').value = '';
       document.getElementById('p-precio').value = '';
       document.getElementById('p-desc').value = '';
       document.getElementById('p-ingredientes').value = '';
+      document.getElementById('p-categoria').value = 'Pizzas';
+      document.getElementById('p-disponible').value = 'si';
       imagenesActuales = [];
       renderizarGaleria();
       return;
     }
-    const p = productosGlobal.find(x => String(x.ID) === String(id));
-    if (p) {
-      document.getElementById('p-id').value = p.ID;
-      document.getElementById('p-nombre').value = p.Nombre;
-      document.getElementById('p-categoria').value = p.Categoria;
-      document.getElementById('p-precio').value = p.Precio;
-      document.getElementById('p-desc').value = p.Descripcion;
-      document.getElementById('p-ingredientes').value = p.Ingredientes;
-      document.getElementById('p-disponible').value = String(p.Disponible).toLowerCase() === 'si' ? 'si' : 'no';
-      
-      if (p.ImagenURL) {
-        imagenesActuales = String(p.ImagenURL).split(',').map(url => url.trim()).filter(url => url !== '');
-      } else {
-        imagenesActuales = [];
-      }
-      renderizarGaleria();
-    }
+
+    const p = productosGlobal.find(function (x) { return String(x.ID) === String(id); });
+    if (!p) return;
+
+    document.getElementById('p-id').value = p.ID || '';
+    document.getElementById('p-nombre').value = p.Nombre || '';
+    document.getElementById('p-categoria').value = p.Categoria || '';
+    document.getElementById('p-precio').value = p.Precio != null ? p.Precio : '';
+    document.getElementById('p-desc').value = p.Descripcion || '';
+    document.getElementById('p-ingredientes').value = p.Ingredientes || '';
+
+    const disp = String(p.Disponible).trim().toLowerCase();
+    document.getElementById('p-disponible').value = (disp === 'si' || disp === 'true' || p.Disponible === true) ? 'si' : 'no';
+
+    const raw = p.ImagenURL || p.Imagen || '';
+    imagenesActuales = String(raw).split(',').map(function (u) { return u.trim(); }).filter(Boolean);
+    renderizarGaleria();
   }
 
   function renderizarGaleria() {
     const galeria = document.getElementById('galeria-imagenes');
     galeria.innerHTML = '';
-    
+
     if (imagenesActuales.length === 0) {
       galeria.innerHTML = '<p style="font-size:12px; color:#95a5a6; width:100%;">Aún no hay imágenes en el carrusel.</p>';
       return;
     }
 
-    imagenesActuales.forEach((url, index) => {
+    imagenesActuales.forEach(function (url, index) {
       const div = document.createElement('div');
       div.className = 'img-item';
-      div.innerHTML = `
-        <img src="${url}" onerror="this.src='https://via.placeholder.com/100?text=Error'">
-        <button onclick="eliminarImagen(${index})" title="Eliminar">X</button>
-      `;
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '';
+      img.onerror = function () { img.style.background = '#eee'; };
+
+      const btn = document.createElement('button');
+      btn.textContent = 'X';
+      btn.title = 'Eliminar';
+      btn.onclick = function () { eliminarImagen(index); };
+
+      div.appendChild(img);
+      div.appendChild(btn);
       galeria.appendChild(div);
     });
   }
@@ -313,11 +949,20 @@
   function agregarImagen() {
     const input = document.getElementById('nueva-imagen-url');
     const url = input.value.trim();
-    if (url) {
-      imagenesActuales.push(url);
-      input.value = '';
-      renderizarGaleria();
+
+    if (!url) return;
+    if (!/^https?:\/\/\S+$/i.test(url)) {
+      alert('La imagen debe ser una URL que empiece por http:// o https://');
+      return;
     }
+    if (imagenesActuales.length >= 8) {
+      alert('Máximo 8 imágenes por producto.');
+      return;
+    }
+
+    imagenesActuales.push(url);
+    input.value = '';
+    renderizarGaleria();
   }
 
   function eliminarImagen(index) {
@@ -326,63 +971,116 @@
   }
 
   async function guardarProducto() {
+    const btn = document.getElementById('btn-guardar');
+    const original = btn.textContent;
+
+    const precio = precioNum(document.getElementById('p-precio').value);
+
     const prod = {
-      ID: document.getElementById('p-id').value,
-      Nombre: document.getElementById('p-nombre').value,
-      Categoria: document.getElementById('p-categoria').value,
-      Precio: document.getElementById('p-precio').value,
-      Descripcion: document.getElementById('p-desc').value,
-      Ingredientes: document.getElementById('p-ingredientes').value,
+      ID: document.getElementById('p-id').value.trim().toUpperCase(),
+      Nombre: document.getElementById('p-nombre').value.trim(),
+      Categoria: document.getElementById('p-categoria').value.trim(),
+      Precio: precio,
+      Descripcion: document.getElementById('p-desc').value.trim(),
+      Ingredientes: document.getElementById('p-ingredientes').value.trim(),
       ImagenURL: imagenesActuales.join(','),
       Disponible: document.getElementById('p-disponible').value
     };
 
-    const btn = document.querySelector('#panel-section > button');
-    const originalText = btn.textContent;
+    if (!prod.ID) { mostrarMsg('panel-msg', 'El ID es obligatorio.', 'error'); return; }
+    if (!/^[A-Za-z0-9_-]{1,20}$/.test(prod.ID)) {
+      mostrarMsg('panel-msg', 'El ID solo admite letras, números, guion y guion bajo.', 'error');
+      return;
+    }
+    if (!prod.Nombre) { mostrarMsg('panel-msg', 'El nombre es obligatorio.', 'error'); return; }
+    if (isNaN(precio) || precio < 0) {
+      mostrarMsg('panel-msg', 'El precio no es válido. Usa por ejemplo 12.50 o 12,50.', 'error');
+      return;
+    }
+
+    document.getElementById('p-id').value = prod.ID;
+
+    btn.disabled = true;
     btn.textContent = 'Guardando...';
+    ocultarMsg('panel-msg');
 
     try {
-      const res = await jsonpRequest({ 
-        action: 'saveProduct', 
-        password: passwordAdmin,
+      const res = await jsonpRequest({
+        action: 'saveProduct',
+        token: tokenAdmin,
         productData: JSON.stringify(prod)
       });
 
-      const msg = document.getElementById('panel-msg');
-      if (res.success) {
-        msg.textContent = res.message;
-        msg.className = 'msg ok';
-        setTimeout(() => location.reload(), 1500);
+      if (sesionInvalida(res)) {
+        guardarToken('');
+        document.getElementById('panel-section').classList.add('hidden');
+        document.getElementById('login-section').classList.remove('hidden');
+        mostrarMsg('login-msg', 'Tu sesión caducó. Vuelve a entrar.', 'error');
+        return;
+      }
+
+      if (res && res.success) {
+        await entrarAlPanel();
+        document.getElementById('select-product').value = prod.ID;
+        cargarProducto();
+        mostrarMsg('panel-msg', res.message || 'Guardado.', 'ok');
       } else {
-        msg.textContent = 'Error: ' + res.error;
-        msg.className = 'msg error';
-        btn.textContent = originalText;
+        mostrarMsg('panel-msg', 'Error: ' + ((res && res.error) || 'no se pudo guardar.'), 'error');
       }
     } catch (e) {
-      alert('Error de conexión al guardar');
-      btn.textContent = originalText;
+      mostrarMsg('panel-msg', 'Error de conexión: ' + (e.message || ''), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
     }
   }
 
-  async function cargarConfig() {
-    try {
-      const res = await jsonpRequest({ action: 'getConfig' });
-      document.getElementById('config-stripe').checked = res.StripeHabilitado;
-    } catch(e) { console.log('Error cargando config'); }
-  }
-
   async function toggleStripe() {
-    const isChecked = document.getElementById('config-stripe').checked;
+    const check = document.getElementById('config-stripe');
+    const isChecked = check.checked;
+    check.disabled = true;
+
     try {
-      const res = await jsonpRequest({ action: 'saveConfig', password: passwordAdmin, stripe: isChecked });
-      if(res.success) {
-        alert(isChecked ? '✅ Pago con tarjeta ACTIVADO en la web' : '⚠️ Pago con tarjeta DESACTIVADO. Se coordinará por WhatsApp.');
-      } else {
-        alert('Error: ' + res.error);
-        document.getElementById('config-stripe').checked = !isChecked;
+      const res = await jsonpRequest({
+        action: 'saveConfig',
+        token: tokenAdmin,
+        stripe: isChecked
+      });
+
+      if (sesionInvalida(res)) {
+        guardarToken('');
+        document.getElementById('panel-section').classList.add('hidden');
+        document.getElementById('login-section').classList.remove('hidden');
+        mostrarMsg('login-msg', 'Tu sesión caducó. Vuelve a entrar.', 'error');
+        check.checked = !isChecked;
+        return;
       }
-    } catch(e) { alert('Error de conexión'); }
+
+      if (res && res.success) {
+        alert(isChecked
+          ? '✅ Pago con tarjeta ACTIVADO en la web.'
+          : '⚠️ Pago con tarjeta DESACTIVADO. Se coordinará por WhatsApp.');
+      } else {
+        alert('Error: ' + ((res && res.error) || 'no se pudo guardar.'));
+        check.checked = !isChecked;
+      }
+    } catch (e) {
+      alert('Error de conexión: ' + (e.message || ''));
+      check.checked = !isChecked;
+    } finally {
+      check.disabled = false;
+    }
   }
 </script>
+
+<!-- Subida de fotos: formulario oculto + iframe (no usa CORS) -->
+<form id="form-subida" method="POST" enctype="multipart/form-data" target="ifr-subida" style="display: none;">
+  <input type="hidden" name="action" value="uploadImage">
+  <input type="hidden" name="token" id="subida-token" value="">
+  <input type="hidden" name="id" id="subida-id" value="">
+  <input type="file" name="archivo" id="subida-archivo" accept="image/*" multiple onchange="procesarFotos(this)">
+</form>
+<iframe name="ifr-subida" id="ifr-subida" title="subida" style="display: none;"></iframe>
+
 </body>
 </html>
