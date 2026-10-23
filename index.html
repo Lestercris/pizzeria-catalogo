@@ -258,6 +258,26 @@
       .hero-btn { width: 34px; height: 34px; font-size: 21px; }
       .hero-cap { font-size: 1rem; padding: 34px 16px 14px; }
     }
+
+    /* Botón flotante WhatsApp */
+    .wa-float {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #25D366;
+      color: white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
   </style>
 </head>
 <body>
@@ -299,7 +319,7 @@
         <input type="email" id="email" placeholder="Tu email" required>
         <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
         <input type="text" id="direccion" placeholder="Dirección de entrega">
-        <button class="btn-pagar" id="btn-pagar" onclick="procesarPedido()" disabled>
+        <button class="btn-pagar" id="btn-pagar" type="button" onclick="procesarPedido()" disabled>
           Pagar y Enviar Pedido
         </button>
         <div id="mensaje" class="mensaje"></div>
@@ -307,53 +327,136 @@
     </aside>
   </div>
 
+  <!-- Botón Flotante de WhatsApp -->
+  <a href="https://wa.me/346601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
+     target="_blank"
+     rel="noopener noreferrer"
+     aria-label="Contactar por WhatsApp"
+     class="wa-float">
+    <svg viewBox="0 0 24 24" width="35" height="35" fill="currentColor" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+
   <script>
     // ============================================
     // ⚙️ CONFIGURACIÓN - REEMPLAZA CON TU URL
     // ============================================
-        //const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0OlPYIS7Ynvq5VP59Yl3vOWcHjomdV6QBzOmiNg1xTgyUAZYaMvRZ9LDEq6t0nPLb/exec';
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec';
-    
-    
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec';
+
     // ============================================
+    // CONSTANTES Y ESTADO GLOBAL
+    // ============================================
+    const MONEDA = '€';
+
+    // Placeholder declarado arriba para evitar ReferenceError
+    const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160">' +
+      '<rect width="100%" height="100%" fill="#f1f1f1"/>' +
+      '<text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text>' +
+      '</svg>'
+    );
+
     let productos = [];
     let carrito = {};
     let stripeHabilitado = false;
-    const MONEDA = '€';
 
+    // ============================================
+    // UTILIDADES
+    // ============================================
     function moneda(n) {
       return MONEDA + (Number(n) || 0).toFixed(2);
     }
 
+    let contadorCb = 0;
+
+    /** Nombre único para cada callback JSONP (evita colisiones si se piden dos a la vez). */
+    function nombreCb(prefijo) {
+      contadorCb += 1;
+      return prefijo + '_' + Date.now() + '_' + contadorCb;
+    }
+
+    /**
+     * Lanza una petición JSONP y ejecuta onData(data) al recibir respuesta.
+     * Limpia el callback y el <script> del DOM automáticamente.
+     */
+    function jsonp(action, onData, onError) {
+      const cb = nombreCb('cb_' + action);
+      const script = document.createElement('script');
+
+      function cleanup() {
+        try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cb] = function (data) {
+        cleanup();
+        if (typeof onData === 'function') onData(data);
+      };
+
+      script.onerror = function () {
+        cleanup();
+        if (typeof onError === 'function') onError();
+      };
+
+      script.src = APPS_SCRIPT_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cb;
+      document.body.appendChild(script);
+    }
+
+    function esc(txt) {
+      return String(txt == null ? '' : txt).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    // Convierte 12 / "12" / "12,50" / "$12.50" / "1.234,56" en número
+    function precioNum(valor) {
+      if (typeof valor === 'number') return isFinite(valor) ? valor : 0;
+      let s = String(valor == null ? '' : valor).replace(/[^\d.,-]/g, '');
+      if (!s) return 0;
+      if (s.indexOf(',') > -1 && s.indexOf('.') > -1) {
+        s = s.lastIndexOf(',') > s.lastIndexOf('.')
+          ? s.replace(/\./g, '').replace(',', '.')
+          : s.replace(/,/g, '');
+      } else {
+        s = s.replace(',', '.');
+      }
+      const n = parseFloat(s);
+      return isNaN(n) ? 0 : n;
+    }
+
+    // La hoja puede traer "si"/true/"Disponible"
+    function esVisible(p) {
+      const d = p.Disponible;
+      if (d === undefined || d === null || d === '') return true;
+      if (typeof d === 'boolean') return d;
+      const t = String(d).trim().toLowerCase();
+      return t === 'si' || t === 'sí' || t === 'true' || t === 'verdadero' || t === '1';
+    }
+
+    // Devuelve las URLs de imagen (soporta "ImagenURL" e "Imagen")
+    function imagenesDe(p) {
+      const raw = p.ImagenURL || p.Imagen || '';
+      return String(raw).split(',').map(function (u) { return u.trim(); }).filter(function (u) { return u !== ''; });
+    }
+
     // ============================================
-    // 1. CARGAR PRODUCTOS (usando JSONP por CORS)
+    // 1. CARGAR PRODUCTOS
     // ============================================
     function cargarProductos() {
-      const cb = 'cbProductos_' + Date.now();
-      window[cb] = function (data) {
-        delete window[cb];
+      jsonp('getProducts', function (data) {
         mostrarProductos(data);
-      };
-      const script = document.createElement('script');
-      script.src = APPS_SCRIPT_URL + '?action=getProducts&callback=' + cb;
-      script.onerror = () => {
+      }, function () {
         document.getElementById('catalogo').innerHTML =
           '<p style="color:red">Error al cargar el menú. Verifica tu conexión.</p>';
-      };
-      document.body.appendChild(script);
-      cargarConfig();
+      });
     }
 
     // Lee si el pago con tarjeta está activo (para no intentar cobrar si está apagado)
     function cargarConfig() {
-      const cb = 'cbConfig_' + Date.now();
-      window[cb] = function (data) {
-        delete window[cb];
+      jsonp('getConfig', function (data) {
         stripeHabilitado = !!(data && (data.StripeHabilitado === true || String(data.StripeHabilitado).toLowerCase() === 'true'));
-      };
-      const script = document.createElement('script');
-      script.src = APPS_SCRIPT_URL + '?action=getConfig&callback=' + cb;
-      document.body.appendChild(script);
+      }, function () { /* silencioso */ });
     }
 
     // ============================================
@@ -364,15 +467,9 @@
     let slideTimer = null;
 
     function cargarSlider() {
-      const cb = 'cbSlider_' + Date.now();
-      window[cb] = function (data) {
-        delete window[cb];
+      jsonp('getSlider', function (data) {
         mostrarSlider(Array.isArray(data) ? data : []);
-      };
-      const script = document.createElement('script');
-      script.src = APPS_SCRIPT_URL + '?action=getSlider&callback=' + cb;
-      script.onerror = function () { /* si falla, simplemente no se muestra */ };
-      document.body.appendChild(script);
+      }, function () { /* si falla, simplemente no se muestra */ });
     }
 
     function mostrarSlider(lista) {
@@ -452,55 +549,7 @@
     }
 
     // ============================================
-    // 1.b UTILIDADES
-    // ============================================
-    function esc(txt) {
-      return String(txt == null ? '' : txt).replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
-    }
-
-    // Convierte 12 / "12" / "12,50" / "$12.50" / "1.234,56" en número
-    function precioNum(valor) {
-      if (typeof valor === 'number') return isFinite(valor) ? valor : 0;
-      let s = String(valor == null ? '' : valor).replace(/[^\d.,-]/g, '');
-      if (!s) return 0;
-      if (s.indexOf(',') > -1 && s.indexOf('.') > -1) {
-        s = s.lastIndexOf(',') > s.lastIndexOf('.')
-          ? s.replace(/\./g, '').replace(',', '.')
-          : s.replace(/,/g, '');
-      } else {
-        s = s.replace(',', '.');
-      }
-      const n = parseFloat(s);
-      return isNaN(n) ? 0 : n;
-    }
-
-    // La hoja puede traer "si"/true/"Disponible"
-    function esVisible(p) {
-      const d = p.Disponible;
-      if (d === undefined || d === null || d === '') return true;
-      if (typeof d === 'boolean') return d;
-      const t = String(d).trim().toLowerCase();
-      return t === 'si' || t === 'sí' || t === 'true' || t === 'verdadero' || t === '1';
-    }
-
-    // Devuelve las URLs de imagen (soporta "ImagenURL" e "Imagen")
-    function imagenesDe(p) {
-      const raw = p.ImagenURL || p.Imagen || '';
-      return String(raw).split(',').map(u => u.trim()).filter(u => u !== '');
-    }
-
-    // Imagen de respaldo (sin depender de servicios externos)
-    const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160">' +
-      '<rect width="100%" height="100%" fill="#f1f1f1"/>' +
-      '<text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text>' +
-      '</svg>'
-    );
-
-    // ============================================
-    // 1.c PINTAR EL CATÁLOGO (callback de JSONP)
+    // 1.c PINTAR EL CATÁLOGO
     // ============================================
     function mostrarProductos(lista) {
       const cont = document.getElementById('catalogo');
@@ -557,7 +606,7 @@
     // 2. GESTIÓN DEL CARRITO
     // ============================================
     function agregarAlCarrito(id) {
-      const p = productos.find(x => String(x.ID) === String(id));
+      const p = productos.find(function (x) { return String(x.ID) === String(id); });
       if (!p) return;
       if (carrito[id]) {
         carrito[id].cantidad++;
@@ -587,23 +636,22 @@
 
       let total = 0;
       let html = '';
-      ids.forEach(id => {
+      ids.forEach(function (id) {
         const item = carrito[id];
         const subtotal = precioNum(item.producto.Precio) * item.cantidad;
         total += subtotal;
-        html += `
-          <div class="carrito-item">
-            <div>
-              <strong>${esc(item.producto.Nombre)}</strong><br>
-              <small>${moneda(precioNum(item.producto.Precio))} c/u</small>
-            </div>
-            <div class="controles">
-              <button onclick="cambiarCantidad('${id}', -1)">−</button>
-              <span>${item.cantidad}</span>
-              <button onclick="cambiarCantidad('${id}', 1)">+</button>
-            </div>
-          </div>
-        `;
+        html +=
+          '<div class="carrito-item">' +
+            '<div>' +
+              '<strong>' + esc(item.producto.Nombre) + '</strong><br>' +
+              '<small>' + moneda(precioNum(item.producto.Precio)) + ' c/u</small>' +
+            '</div>' +
+            '<div class="controles">' +
+              '<button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', -1)">−</button>' +
+              '<span>' + item.cantidad + '</span>' +
+              '<button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', 1)">+</button>' +
+            '</div>' +
+          '</div>';
       });
 
       cont.innerHTML = html;
@@ -619,34 +667,48 @@
       const email = document.getElementById('email').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const direccion = document.getElementById('direccion').value.trim();
-      const msg = document.getElementById('mensaje');
 
       if (!nombre || !email) {
         mostrarMensaje('Por favor, completa tu nombre y email.', 'error');
         return;
       }
 
-      const items = Object.keys(carrito).map(id => ({
-        id: id,
-        cantidad: carrito[id].cantidad
-      }));
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        mostrarMensaje('El email no tiene un formato válido.', 'error');
+        return;
+      }
+
+      const items = Object.keys(carrito).map(function (id) {
+        return { id: id, cantidad: carrito[id].cantidad };
+      });
 
       if (items.length === 0) {
         mostrarMensaje('Tu carrito está vacío.', 'error');
         return;
       }
 
-      document.getElementById('btn-pagar').disabled = true;
-      document.getElementById('btn-pagar').textContent = 'Procesando...';
+      const btn = document.getElementById('btn-pagar');
+      btn.disabled = true;
+      btn.textContent = 'Procesando...';
 
-      // Enviamos los datos con JSONP (Apps Script no soporta CORS)
-      const callbackName = 'callbackPedido_' + Date.now();
-      window[callbackName] = function(respuesta) {
-        document.getElementById('btn-pagar').disabled = false;
-        document.getElementById('btn-pagar').textContent = 'Pagar y Enviar Pedido';
-        delete window[callbackName];
+      const callbackName = nombreCb('callbackPedido');
+      const script = document.createElement('script');
+
+      function restaurarBoton() {
+        btn.disabled = Object.keys(carrito).length === 0;
+        btn.textContent = 'Pagar y Enviar Pedido';
+      }
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[callbackName] = function (respuesta) {
+        cleanup();
 
         if (!respuesta || typeof respuesta !== 'object') {
+          restaurarBoton();
           mostrarMensaje('Error: respuesta no válida del servidor.', 'error');
           return;
         }
@@ -662,10 +724,18 @@
           mostrarMensaje(respuesta.message || '¡Pedido registrado! Nos pondremos en contacto para el pago.', 'ok');
           carrito = {};
           renderCarrito();
+          restaurarBoton();
           return;
         }
 
+        restaurarBoton();
         mostrarMensaje('Error: ' + (respuesta.error || 'No se pudo procesar el pedido.'), 'error');
+      };
+
+      script.onerror = function () {
+        cleanup();
+        restaurarBoton();
+        mostrarMensaje('Error de conexión. Inténtalo de nuevo.', 'error');
       };
 
       const params = new URLSearchParams({
@@ -679,7 +749,6 @@
         skipStripe: stripeHabilitado ? 'false' : 'true'
       });
 
-      const script = document.createElement('script');
       script.src = APPS_SCRIPT_URL + '?' + params.toString();
       document.body.appendChild(script);
     }
@@ -709,16 +778,5 @@
       cargarConfig();
     });
   </script>
-   <!-- Botón Flotante de WhatsApp -->
-<a href="https://wa.me/346601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzería%20Hermanos%20Rivas" 
-   target="_blank" 
-   style="position: fixed; bottom: 20px; right: 20px; background: #25D366; color: white; 
-          border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; 
-          justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; 
-          text-decoration: none; font-size: 35px;">
-   <svg viewBox="0 0 24 24" width="35" height="35" fill="currentColor">
-     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.602 2.664-.699c.974.532 1.853.813 2.796.813 3.181 0 5.768-2.586 5.769-5.767.001-3.181-2.586-5.768-5.769-5.768zm3.362 7.966c-.133.372-.771.723-1.06.75-.288.028-.573.136-1.774-.474-1.451-.736-2.389-2.25-2.461-2.35-.071-.1-.564-.75-.564-1.43 0-.682.354-1.018.481-1.153.127-.136.276-.17.368-.17.092 0 .184.001.263.005.085.004.201-.032.313.239.112.272.381.93.414 1.003.033.072.055.156.009.247-.046.092-.091.148-.182.252-.091.104-.191.233-.273.313-.091.088-.186.184-.08.368.106.184.47.775 1.007 1.254.688.612 1.269.8 1.451.889.182.089.289.074.396-.045.107-.119.458-.533.58-.717.122-.184.243-.153.409-.092.166.061 1.053.496 1.234.586.182.091.303.136.348.213.045.077.045.447-.088.819z"></path>
-   </svg>
-</a>
 </body>
 </html>
