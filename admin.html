@@ -246,7 +246,7 @@
   <p class="subtitle">Bienvenido al centro de control.<br>Gestiona tu menú, precios y configuración de pagos.</p>
 
   <label for="admin-pass">Contraseña de Administrador</label>
-  <input type="password" id="admin-pass" placeholder="Ingresa tu contraseña segura" autocomplete="current-password">
+  <input type="password" id="admin-pass" placeholder="Ingresa tu contraseña segura" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()">
 
   <button id="btn-login" type="button" onclick="login()">Acceder al Panel</button>
   <div id="login-msg" class="msg"></div>
@@ -261,7 +261,7 @@
   <p class="subtitle">Actualiza la información y las fotos de tu catálogo en tiempo real.</p>
 
   <div class="aviso">
-    La sesión caduca sola a las 2 horas. Si ves errores de sesión, vuelve a entrar.
+    La sesión caduca tras 2 horas de inactividad. Si ves errores de sesión, vuelve a entrar.
   </div>
 
   <!-- INTERRUPTOR DE STRIPE -->
@@ -349,15 +349,24 @@
   <div id="panel-msg" class="msg"></div>
 </div>
 
+<!-- FORMULARIO OCULTO PARA SUBIR FOTOS -->
+<form id="form-subida" method="POST" enctype="multipart/form-data" target="ifr-subida" style="display: none;">
+  <input type="hidden" name="action" value="uploadImage">
+  <input type="hidden" name="token" id="subida-token" value="">
+  <input type="hidden" name="id" id="subida-id" value="">
+  <input type="file" name="archivo" id="subida-archivo" accept="image/*" multiple onchange="procesarFotos(this)">
+</form>
+<iframe name="ifr-subida" id="ifr-subida" title="subida" style="display: none;"></iframe>
+
 <script>
   // ============================================
   // ⚙️ CONFIGURACIÓN
   // ============================================
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOjB0U20gIvhKIbDIW6JSbePrAYtZbda90C_AaoPSavFDwTjBlIHOfY7vlk_1zTjMA9w/exec';
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec';
   const CLAVE_TOKEN = 'hr_adm_token';
   const TIMEOUT_JSONP = 20000;
-  const TIMEOUT_SUBIDA = 120000;   // 2 minutos por foto
-  const POLL_MS = 1500;            // consultar cada 1.5s
+  const TIMEOUT_SUBIDA = 120000;
+  const POLL_MS = 1500;
 
   let productosGlobal = [];
   let tokenAdmin = '';
@@ -390,7 +399,7 @@
   }
 
   // ============================================
-  // PUENTE JSONP (con timeout que SÍ se cancela)
+  // PUENTE JSONP
   // ============================================
   function jsonpRequest(params) {
     return new Promise(function (resolve, reject) {
@@ -412,17 +421,11 @@
       const query = new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
       script = document.createElement('script');
       script.src = APPS_SCRIPT_URL + '?' + query;
-      script.onerror = function () {
-        limpiar();
-        reject(new Error('No se pudo conectar con el servidor.'));
-      };
+      script.onerror = function () { limpiar(); reject(new Error('No se pudo conectar con el servidor.')); };
       document.body.appendChild(script);
 
       timerId = setTimeout(function () {
-        if (!terminado) {
-          limpiar();
-          reject(new Error('El servidor tardó demasiado en responder.'));
-        }
+        if (!terminado) { limpiar(); reject(new Error('El servidor tardó demasiado en responder.')); }
       }, TIMEOUT_JSONP);
     });
   }
@@ -435,7 +438,7 @@
     try {
       if (tokenAdmin) sessionStorage.setItem(CLAVE_TOKEN, tokenAdmin);
       else sessionStorage.removeItem(CLAVE_TOKEN);
-    } catch (e) { /* sessionStorage bloqueado */ }
+    } catch (e) {}
   }
 
   function leerToken() {
@@ -459,14 +462,11 @@
   // ============================================
   // UTILIDADES VARIAS
   // ============================================
-  /** Acepta 12 / 12.5 / "12,50" / "1.234,56" y devuelve número (o NaN). */
   function precioNum(valor) {
     let s = String(valor === null || valor === undefined ? '' : valor).replace(/[^\d.,-]/g, '');
     if (!s) return NaN;
     if (s.indexOf(',') > -1 && s.indexOf('.') > -1) {
-      s = s.lastIndexOf(',') > s.lastIndexOf('.')
-        ? s.replace(/\./g, '').replace(',', '.')
-        : s.replace(/,/g, '');
+      s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
     } else {
       s = s.replace(',', '.');
     }
@@ -474,7 +474,6 @@
     return isNaN(n) ? NaN : n;
   }
 
-  /** SHA-256 en hexadecimal con Web Crypto (necesita https o localhost). */
   async function sha256Hex(texto) {
     if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
       throw new Error('Tu navegador bloquea el acceso seguro. Abre la página con https://');
@@ -496,12 +495,10 @@
     });
   }
 
-  /** Valida que sea URL http(s) o ruta relativa que empiece por "/". */
   function urlValida(url) {
     return /^(https?:\/\/|\/)\S+$/i.test(String(url || '').trim());
   }
 
-  /** Convierte enlaces de "compartir" de Drive en una URL de imagen directa. */
   function normalizarUrlImagen(url) {
     const u = String(url || '').trim();
     const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=|uc\?id=)([\w-]{10,})/);
@@ -526,17 +523,14 @@
     ocultarMsg('login-msg');
 
     try {
-      // 1) Desafío de un solo uso
       const desafio = await jsonpRequest({ action: 'challenge' });
       if (!desafio || !desafio.success || !desafio.nonce) {
         throw new Error((desafio && desafio.error) || 'No se pudo iniciar el acceso.');
       }
 
-      // 2) Calculamos la respuesta en el navegador. La contraseña NO se envía.
       const huella = await sha256Hex(pass);
       const respuesta = await sha256Hex(desafio.nonce + ':' + huella);
 
-      // 3) Enviamos solo el hash del desafío
       const res = await jsonpRequest({
         action: 'login',
         nonce: desafio.nonce,
@@ -583,7 +577,6 @@
       select.appendChild(opt);
     });
 
-    // CORREGIDO: distinguir "true"/"false" como string
     if (res.config) {
       const val = res.config.StripeHabilitado;
       document.getElementById('config-stripe').checked =
@@ -604,7 +597,7 @@
     sliderItems = [];
     imagenesActuales = [];
     if (t) {
-      try { await jsonpRequest({ action: 'logout', token: t }); } catch (e) { /* silencioso */ }
+      try { await jsonpRequest({ action: 'logout', token: t }); } catch (e) {}
     }
   }
 
@@ -719,7 +712,6 @@
     sliderItems.push({ ID: '', URL: '', Titulo: '', Activo: true });
     renderizarSlider();
 
-    // CORREGIDO: enfocar la URL del último slide, no un índice arbitrario
     const filas = document.querySelectorAll('#slider-lista .slide-item');
     if (filas.length) {
       const input = filas[filas.length - 1].querySelector('.campos input[type="text"]');
@@ -752,7 +744,7 @@
         return;
       }
       if (!urlValida(sliderItems[i].URL)) {
-        mostrarMsg('slider-msg', 'La imagen ' + (i + 1) + ' tiene una URL no válida (debe empezar por http://, https:// o /).', 'error');
+        mostrarMsg('slider-msg', 'La imagen ' + (i + 1) + ' tiene una URL no válida.', 'error');
         return;
       }
     }
@@ -796,7 +788,6 @@
     input.click();
   }
 
-  /** Reduce la foto para que suba rápido (máx. 1600 px de lado). */
   async function comprimirImagen(archivo, maxLado, calidad) {
     maxLado = maxLado || 1600;
     calidad = calidad || 0.85;
@@ -804,7 +795,6 @@
     if (!/^image\//.test(archivo.type || '')) {
       throw new Error('Ese archivo no es una imagen.');
     }
-    // Los GIF animados se envían tal cual
     if (archivo.type === 'image/gif') return archivo;
 
     const url = URL.createObjectURL(archivo);
@@ -826,4 +816,310 @@
       lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
 
       const reducida = await new Promise(function (res) {
-        lienzo.toBlob(res, 'image/j
+        lienzo.toBlob(res, 'image/jpeg', calidad);
+      });
+
+      if (!reducida) return archivo;
+
+      const nombre = (archivo.name || 'foto').replace(/\.[^.]+$/, '') + '.jpg';
+      return new File([reducida], nombre, { type: 'image/jpeg' });
+    } catch (e) {
+      return archivo;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function subirArchivo(archivo) {
+    return new Promise(function (resolve, reject) {
+      if (!tokenAdmin) { reject(new Error('Tu sesión caducó. Vuelve a entrar.')); return; }
+
+      const id = uuidV4();
+      const form = document.getElementById('form-subida');
+      const input = document.getElementById('subida-archivo');
+
+      document.getElementById('subida-token').value = tokenAdmin;
+      document.getElementById('subida-id').value = id;
+
+      try {
+        const dt = new DataTransfer();
+        dt.items.add(new File([archivo], archivo.name || 'foto.jpg', { type: archivo.type || 'image/jpeg' }));
+        input.files = dt.files;
+      } catch (e) {
+        reject(new Error('Tu navegador no permite subir la foto. Usa el enlace manual.'));
+        return;
+      }
+
+      form.action = APPS_SCRIPT_URL;
+      form.submit();
+
+      let intentos = 0;
+      const temporizador = setInterval(async function () {
+        intentos++;
+
+        if (intentos > 80) {
+          clearInterval(temporizador);
+          reject(new Error('La subida tardó demasiado. Comprueba tu conexión.'));
+          return;
+        }
+
+        try {
+          const res = await jsonpRequest({ action: 'uploadStatus', id: id });
+          if (res && res.success === true && res.url) {
+            clearInterval(temporizador);
+            resolve(res.url);
+          } else if (res && res.success === false) {
+            clearInterval(temporizador);
+            reject(new Error(res.error || 'No se pudo subir la foto.'));
+          }
+        } catch (e) {}
+      }, POLL_MS);
+    });
+  }
+
+  async function procesarFotos(input) {
+    const archivos = Array.prototype.slice.call(input.files || []);
+    input.value = '';
+    if (!archivos.length) return;
+
+    const esSlider = destinoSubida === 'slider';
+    const msgId = esSlider ? 'slider-msg' : 'panel-msg';
+    const progId = esSlider ? 'slider-progress' : 'producto-progress';
+    const limite = esSlider ? 10 : 8;
+
+    for (let i = 0; i < archivos.length; i++) {
+      const cuantas = esSlider ? sliderItems.length : imagenesActuales.length;
+      if (cuantas >= limite) {
+        mostrarMsg(msgId, 'Máximo ' + limite + ' fotos.', 'error');
+        break;
+      }
+
+      try {
+        mostrarProgreso(progId, '⏳ Subiendo ' + (i + 1) + ' de ' + archivos.length + '...');
+        mostrarMsg(msgId, '', 'ok');
+
+        const reducida = await comprimirImagen(archivos[i]);
+        const url = await subirArchivo(reducida);
+
+        if (esSlider) {
+          sliderItems.push({ ID: '', URL: url, Titulo: '', Activo: true });
+          renderizarSlider();
+          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar slider" para publicarla.', 'ok');
+        } else {
+          imagenesActuales.push(url);
+          renderizarGaleria();
+          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar Cambios del Producto" para publicarla.', 'ok');
+        }
+      } catch (e) {
+        mostrarMsg(msgId, e.message || 'No se pudo subir la foto.', 'error');
+      } finally {
+        mostrarProgreso(progId, '');
+      }
+    }
+  }
+
+  // ============================================
+  // FORMULARIO DE PRODUCTO
+  // ============================================
+  function cargarProducto() {
+    const id = document.getElementById('select-product').value;
+
+    if (!id) {
+      document.getElementById('p-id').value = '';
+      document.getElementById('p-nombre').value = '';
+      document.getElementById('p-precio').value = '';
+      document.getElementById('p-desc').value = '';
+      document.getElementById('p-ingredientes').value = '';
+      document.getElementById('p-categoria').value = 'Pizzas';
+      document.getElementById('p-disponible').value = 'si';
+      imagenesActuales = [];
+      renderizarGaleria();
+      return;
+    }
+
+    const p = productosGlobal.find(function (x) { return String(x.ID) === String(id); });
+    if (!p) return;
+
+    document.getElementById('p-id').value = p.ID || '';
+    document.getElementById('p-nombre').value = p.Nombre || '';
+    document.getElementById('p-categoria').value = p.Categoria || '';
+    document.getElementById('p-precio').value = p.Precio != null ? p.Precio : '';
+    document.getElementById('p-desc').value = p.Descripcion || '';
+    document.getElementById('p-ingredientes').value = p.Ingredientes || '';
+
+    const disp = String(p.Disponible).trim().toLowerCase();
+    document.getElementById('p-disponible').value = (disp === 'si' || disp === 'true' || p.Disponible === true) ? 'si' : 'no';
+
+    const raw = p.ImagenURL || p.Imagen || '';
+    imagenesActuales = String(raw).split(',').map(function (u) { return u.trim(); }).filter(Boolean);
+    renderizarGaleria();
+  }
+
+  function renderizarGaleria() {
+    const galeria = document.getElementById('galeria-imagenes');
+    galeria.innerHTML = '';
+
+    if (imagenesActuales.length === 0) {
+      galeria.innerHTML = '<p style="font-size:12px; color:#95a5a6; width:100%;">Aún no hay imágenes en el carrusel.</p>';
+      return;
+    }
+
+    imagenesActuales.forEach(function (url, index) {
+      const div = document.createElement('div');
+      div.className = 'img-item';
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '';
+      img.onerror = function () { img.style.background = '#eee'; };
+
+      const btn = document.createElement('button');
+      btn.textContent = 'X';
+      btn.type = 'button';
+      btn.title = 'Eliminar';
+      btn.onclick = function () { eliminarImagen(index); };
+
+      div.appendChild(img);
+      div.appendChild(btn);
+      galeria.appendChild(div);
+    });
+  }
+
+  function agregarImagen() {
+    const input = document.getElementById('nueva-imagen-url');
+    const url = input.value.trim();
+
+    if (!url) return;
+    if (!/^https?:\/\/\S+$/i.test(url)) {
+      alert('La imagen debe ser una URL que empiece por http:// o https://');
+      return;
+    }
+    if (imagenesActuales.length >= 8) {
+      alert('Máximo 8 imágenes por producto.');
+      return;
+    }
+
+    imagenesActuales.push(url);
+    input.value = '';
+    renderizarGaleria();
+  }
+
+  function eliminarImagen(index) {
+    imagenesActuales.splice(index, 1);
+    renderizarGaleria();
+  }
+
+  async function guardarProducto() {
+    const btn = document.getElementById('btn-guardar');
+    const original = btn.textContent;
+
+    const precio = precioNum(document.getElementById('p-precio').value);
+
+    const prod = {
+      ID: document.getElementById('p-id').value.trim().toUpperCase(),
+      Nombre: document.getElementById('p-nombre').value.trim(),
+      Categoria: document.getElementById('p-categoria').value.trim(),
+      Precio: precio,
+      Descripcion: document.getElementById('p-desc').value.trim(),
+      Ingredientes: document.getElementById('p-ingredientes').value.trim(),
+      ImagenURL: imagenesActuales.join(','),
+      Disponible: document.getElementById('p-disponible').value
+    };
+
+    if (!prod.ID) { mostrarMsg('panel-msg', 'El ID es obligatorio.', 'error'); return; }
+    if (!/^[A-Za-z0-9_-]{1,20}$/.test(prod.ID)) {
+      mostrarMsg('panel-msg', 'El ID solo admite letras, números, guion y guion bajo.', 'error');
+      return;
+    }
+    if (!prod.Nombre) { mostrarMsg('panel-msg', 'El nombre es obligatorio.', 'error'); return; }
+    if (isNaN(precio) || precio < 0) {
+      mostrarMsg('panel-msg', 'El precio no es válido. Usa por ejemplo 12.50 o 12,50.', 'error');
+      return;
+    }
+
+    document.getElementById('p-id').value = prod.ID;
+
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    ocultarMsg('panel-msg');
+
+    try {
+      const res = await jsonpRequest({
+        action: 'saveProduct',
+        token: tokenAdmin,
+        productData: JSON.stringify(prod)
+      });
+
+      if (sesionInvalida(res)) {
+        volverAlLogin('Tu sesión caducó. Vuelve a entrar.');
+        return;
+      }
+
+      if (res && res.success) {
+        await entrarAlPanel();
+        document.getElementById('select-product').value = prod.ID;
+        cargarProducto();
+        mostrarMsg('panel-msg', res.message || 'Guardado.', 'ok');
+      } else {
+        mostrarMsg('panel-msg', 'Error: ' + ((res && res.error) || 'no se pudo guardar.'), 'error');
+      }
+    } catch (e) {
+      mostrarMsg('panel-msg', 'Error de conexión: ' + (e.message || ''), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  async function toggleStripe() {
+    const check = document.getElementById('config-stripe');
+    const isChecked = check.checked;
+    check.disabled = true;
+    ocultarMsg('stripe-msg');
+
+    try {
+      const res = await jsonpRequest({
+        action: 'saveConfig',
+        token: tokenAdmin,
+        stripe: isChecked
+      });
+
+      if (sesionInvalida(res)) {
+        volverAlLogin('Tu sesión caducó. Vuelve a entrar.');
+        check.checked = !isChecked;
+        return;
+      }
+
+      if (res && res.success) {
+        mostrarMsg('stripe-msg', isChecked
+          ? '✅ Pago con tarjeta ACTIVADO en la web.'
+          : '⚠️ Pago con tarjeta DESACTIVADO. Se coordinará por WhatsApp.', 'ok');
+      } else {
+        mostrarMsg('stripe-msg', 'Error: ' + ((res && res.error) || 'no se pudo guardar.'), 'error');
+        check.checked = !isChecked;
+      }
+    } catch (e) {
+      mostrarMsg('stripe-msg', 'Error de conexión: ' + (e.message || ''), 'error');
+      check.checked = !isChecked;
+    } finally {
+      check.disabled = false;
+    }
+  }
+
+  // ============================================
+  // INICIO
+  // ============================================
+  window.addEventListener('DOMContentLoaded', async function () {
+    const guardado = leerToken();
+    if (!guardado) return;
+
+    tokenAdmin = guardado;
+    try {
+      await entrarAlPanel();
+    } catch (e) {
+      guardarToken('');
+    }
+  });
+</script>
+</body>
+</html>
