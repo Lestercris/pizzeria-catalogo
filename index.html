@@ -227,37 +227,19 @@
       document.body.appendChild(script);
     }
 
-    // Esta función se llama automáticamente cuando Apps Script responde
-    function mostrarProductos(data) {
-      productos = data;
-      const cont = document.getElementById('catalogo');
-      cont.innerHTML = '';
-
-      if (!productos || productos.length === 0) {
-        cont.innerHTML = '<p>No hay productos disponibles.</p>';
-        return;
-      }
-
-      productos.forEach(p => {
-        if (String(p.Disponible).toLowerCase() !== 'sí' &&
-            String(p.Disponible).toLowerCase() !== 'si') return;
-
-        const img = p.ImagenURL || 'https://via.placeholder.com/300x160?text=Pizza';
-        const card = document.createElement('div');
-        card.className = 'producto';
-        card.innerHTML = `
-          <img src="${img}" alt="${p.Nombre}" onerror="this.src='https://via.placeholder.com/300x160?text=Pizza'">
-          <div class="producto-body">
-            <h3>${p.Nombre}</h3>
-            <p class="desc">${p.Descripcion || ''}</p>
-            <p class="ingredientes">${p.Ingredientes || ''}</p>
-            <p class="precio">$${Number(p.Precio).toFixed(2)}</p>
-            <button onclick="agregarAlCarrito('${p.ID}')">+ Agregar</button>
-          </div>
-        `;
-        cont.appendChild(card);
-      });
-    }
+   // Lógica para múltiples imágenes (Carrusel deslizable)
+let imagenesHTML = '';
+if (p.ImagenURL && String(p.ImagenURL).includes(',')) {
+  const urls = String(p.ImagenURL).split(',');
+  imagenesHTML = `
+    <div style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 5px; padding-bottom: 5px; scrollbar-width: none;">
+      ${urls.map(url => `<img src="${url.trim()}" style="min-width: 100%; height: 160px; object-fit: cover; scroll-snap-align: start; border-radius: 8px;" onerror="this.src='https://via.placeholder.com/300x160?text=Pizza'">`).join('')}
+    </div>
+  `;
+} else {
+  const img = p.ImagenURL || 'https://via.placeholder.com/300x160?text=Pizza';
+  imagenesHTML = `<img src="${img}" style="width: 100%; height: 160px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/300x160?text=Pizza'">`;
+}
 
     // ============================================
     // 2. GESTIÓN DEL CARRITO
