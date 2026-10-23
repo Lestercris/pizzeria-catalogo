@@ -211,6 +211,31 @@
     .slide-item .acciones button:hover { background: #dfe6e8; }
     .slide-item .acciones button.del { background: #fdecea; color: #c0392b; }
     .slide-item .acciones button:disabled { opacity: 0.35; cursor: default; }
+
+    /* Barra de progreso de subida */
+    .upload-progress {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: #e8f4f8;
+      border-radius: 8px;
+      font-size: 12.5px;
+      color: #2980b9;
+      text-align: center;
+    }
+    .upload-progress.on { display: block; }
+    .upload-progress::before {
+      content: '';
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 2px solid #ddd;
+      border-top-color: #3498db;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -223,7 +248,7 @@
   <label for="admin-pass">Contraseña de Administrador</label>
   <input type="password" id="admin-pass" placeholder="Ingresa tu contraseña segura" autocomplete="current-password">
 
-  <button id="btn-login" onclick="login()">Acceder al Panel</button>
+  <button id="btn-login" type="button" onclick="login()">Acceder al Panel</button>
   <div id="login-msg" class="msg"></div>
 </div>
 
@@ -231,7 +256,7 @@
 <div class="card hidden" id="panel-section" style="max-width: 700px;">
   <div class="topbar">
     <h2>⚙️ Gestión de Productos</h2>
-    <button class="btn-salir" onclick="salir()">Cerrar sesión</button>
+    <button class="btn-salir" type="button" onclick="salir()">Cerrar sesión</button>
   </div>
   <p class="subtitle">Actualiza la información y las fotos de tu catálogo en tiempo real.</p>
 
@@ -247,6 +272,7 @@
       <span style="font-weight: 600; color: #2c3e50;">Habilitar Pago con Tarjeta (Stripe)</span>
     </label>
     <p style="font-size: 12px; color: #7f8c8d; margin-left: 30px;">Si está desactivado, los clientes coordinarán el pago por WhatsApp.</p>
+    <div id="stripe-msg" class="msg"></div>
   </div>
 
   <!-- SLIDER DE PORTADA -->
@@ -264,6 +290,7 @@
       <button id="btn-slider" class="btn-small" type="button" onclick="guardarSlider()" style="background: #e67e22;">Guardar slider</button>
     </div>
     <div id="slider-msg" class="msg"></div>
+    <div id="slider-progress" class="upload-progress"></div>
   </div>
 
   <label for="select-product">Seleccionar Producto para Editar:</label>
@@ -312,12 +339,13 @@
 
     <div class="input-group">
       <input type="url" id="nueva-imagen-url" placeholder="https://ejemplo.com/foto.jpg" maxlength="500">
-      <button class="btn-small" onclick="agregarImagen()">Añadir Foto</button>
+      <button class="btn-small" type="button" onclick="agregarImagen()">Añadir Foto</button>
       <button class="btn-small" type="button" onclick="pedirFoto('producto')" style="background: #3498db;" title="Subir desde el móvil">📷</button>
     </div>
+    <div id="producto-progress" class="upload-progress"></div>
   </div>
 
-  <button id="btn-guardar" onclick="guardarProducto()" style="background: #27ae60;">Guardar Cambios del Producto</button>
+  <button id="btn-guardar" type="button" onclick="guardarProducto()" style="background: #27ae60;">Guardar Cambios del Producto</button>
   <div id="panel-msg" class="msg"></div>
 </div>
 
@@ -327,32 +355,59 @@
   // ============================================
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec';
   const CLAVE_TOKEN = 'hr_adm_token';
+  const TIMEOUT_JSONP = 20000;
+  const TIMEOUT_SUBIDA = 120000;   // 2 minutos por foto
+  const POLL_MS = 1500;            // consultar cada 1.5s
 
   let productosGlobal = [];
   let tokenAdmin = '';
   let imagenesActuales = [];
   let sliderItems = [];
+  let destinoSubida = 'slider';
 
   // ============================================
-  // PUENTE JSONP
+  // UTILIDADES DE UI
+  // ============================================
+  function mostrarMsg(id, texto, tipo) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = texto;
+    el.className = 'msg ' + tipo;
+  }
+
+  function ocultarMsg(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = '';
+    el.className = 'msg';
+  }
+
+  function mostrarProgreso(id, texto) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (texto) { el.textContent = texto; el.classList.add('on'); }
+    else { el.textContent = ''; el.classList.remove('on'); }
+  }
+
+  // ============================================
+  // PUENTE JSONP (con timeout que SÍ se cancela)
   // ============================================
   function jsonpRequest(params) {
     return new Promise(function (resolve, reject) {
       const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
       let script = null;
       let terminado = false;
+      let timerId = null;
 
       function limpiar() {
         if (terminado) return;
         terminado = true;
+        if (timerId) { clearTimeout(timerId); timerId = null; }
         try { delete window[cb]; } catch (e) { window[cb] = undefined; }
         if (script && script.parentNode) script.parentNode.removeChild(script);
       }
 
-      window[cb] = function (data) {
-        limpiar();
-        resolve(data);
-      };
+      window[cb] = function (data) { limpiar(); resolve(data); };
 
       const query = new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
       script = document.createElement('script');
@@ -363,44 +418,47 @@
       };
       document.body.appendChild(script);
 
-      setTimeout(function () {
+      timerId = setTimeout(function () {
         if (!terminado) {
           limpiar();
           reject(new Error('El servidor tardó demasiado en responder.'));
         }
-      }, 20000);
+      }, TIMEOUT_JSONP);
     });
   }
 
+  // ============================================
+  // SESIÓN
+  // ============================================
   function guardarToken(t) {
     tokenAdmin = t || '';
     try {
       if (tokenAdmin) sessionStorage.setItem(CLAVE_TOKEN, tokenAdmin);
       else sessionStorage.removeItem(CLAVE_TOKEN);
-    } catch (e) { }
+    } catch (e) { /* sessionStorage bloqueado */ }
   }
 
   function leerToken() {
     try { return sessionStorage.getItem(CLAVE_TOKEN) || ''; } catch (e) { return ''; }
   }
 
-  function mostrarMsg(id, texto, tipo) {
-    const el = document.getElementById(id);
-    el.textContent = texto;
-    el.className = 'msg ' + tipo;
-  }
-
-  function ocultarMsg(id) {
-    const el = document.getElementById(id);
-    el.textContent = '';
-    el.className = 'msg';
-  }
-
-  /** Si el backend dice que la sesión no vale, volvemos al login. */
   function sesionInvalida(res) {
     return !!(res && res.success === false && /sesi[oó]n/i.test(res.error || ''));
   }
 
+  function volverAlLogin(mensaje) {
+    guardarToken('');
+    document.getElementById('panel-section').classList.add('hidden');
+    document.getElementById('login-section').classList.remove('hidden');
+    ocultarMsg('panel-msg');
+    ocultarMsg('slider-msg');
+    ocultarMsg('stripe-msg');
+    if (mensaje) mostrarMsg('login-msg', mensaje, 'error');
+  }
+
+  // ============================================
+  // UTILIDADES VARIAS
+  // ============================================
   /** Acepta 12 / 12.5 / "12,50" / "1.234,56" y devuelve número (o NaN). */
   function precioNum(valor) {
     let s = String(valor === null || valor === undefined ? '' : valor).replace(/[^\d.,-]/g, '');
@@ -428,6 +486,29 @@
     }).join('');
   }
 
+  function uuidV4() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  /** Valida que sea URL http(s) o ruta relativa que empiece por "/". */
+  function urlValida(url) {
+    return /^(https?:\/\/|\/)\S+$/i.test(String(url || '').trim());
+  }
+
+  /** Convierte enlaces de "compartir" de Drive en una URL de imagen directa. */
+  function normalizarUrlImagen(url) {
+    const u = String(url || '').trim();
+    const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=|uc\?id=)([\w-]{10,})/);
+    if (m) return 'https://lh3.googleusercontent.com/d/' + m[1] + '=w1600';
+    return u;
+  }
+
   // ============================================
   // LOGIN / LOGOUT
   // ============================================
@@ -445,7 +526,7 @@
     ocultarMsg('login-msg');
 
     try {
-      // 1) Pedimos un desafío de un solo uso
+      // 1) Desafío de un solo uso
       const desafio = await jsonpRequest({ action: 'challenge' });
       if (!desafio || !desafio.success || !desafio.nonce) {
         throw new Error((desafio && desafio.error) || 'No se pudo iniciar el acceso.');
@@ -466,19 +547,15 @@
 
       if (!res || !res.success || !res.token) {
         mostrarMsg('login-msg', (res && res.error) || 'No se pudo iniciar sesión.', 'error');
-        btn.disabled = false;
-        btn.textContent = 'Acceder al Panel';
         return;
       }
 
       guardarToken(res.token);
       await entrarAlPanel();
-
-      btn.disabled = false;
-      btn.textContent = 'Acceder al Panel';
     } catch (e) {
       document.getElementById('admin-pass').value = '';
       mostrarMsg('login-msg', e.message || 'Error de conexión.', 'error');
+    } finally {
       btn.disabled = false;
       btn.textContent = 'Acceder al Panel';
     }
@@ -506,8 +583,11 @@
       select.appendChild(opt);
     });
 
+    // CORREGIDO: distinguir "true"/"false" como string
     if (res.config) {
-      document.getElementById('config-stripe').checked = !!res.config.StripeHabilitado;
+      const val = res.config.StripeHabilitado;
+      document.getElementById('config-stripe').checked =
+        val === true || String(val).toLowerCase() === 'true';
     }
 
     sliderItems = Array.isArray(res.slider) ? res.slider : [];
@@ -515,6 +595,17 @@
 
     ocultarMsg('panel-msg');
     ocultarMsg('slider-msg');
+    ocultarMsg('stripe-msg');
+  }
+
+  async function salir() {
+    const t = tokenAdmin;
+    volverAlLogin();
+    sliderItems = [];
+    imagenesActuales = [];
+    if (t) {
+      try { await jsonpRequest({ action: 'logout', token: t }); } catch (e) { /* silencioso */ }
+    }
   }
 
   // ============================================
@@ -628,8 +719,12 @@
     sliderItems.push({ ID: '', URL: '', Titulo: '', Activo: true });
     renderizarSlider();
 
-    const inputs = document.querySelectorAll('#slider-lista .campos input[type="text"]');
-    if (inputs.length >= 2) inputs[inputs.length - 2].focus();
+    // CORREGIDO: enfocar la URL del último slide, no un índice arbitrario
+    const filas = document.querySelectorAll('#slider-lista .slide-item');
+    if (filas.length) {
+      const input = filas[filas.length - 1].querySelector('.campos input[type="text"]');
+      if (input) input.focus();
+    }
   }
 
   function moverSlide(i, dir) {
@@ -647,14 +742,6 @@
     ocultarMsg('slider-msg');
   }
 
-  /** Convierte enlaces de "compartir" de Drive en una URL de imagen directa. */
-  function normalizarUrlImagen(url) {
-    const u = String(url || '').trim();
-    const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
-    if (m) return 'https://lh3.googleusercontent.com/d/' + m[1] + '=w1600';
-    return u;
-  }
-
   async function guardarSlider() {
     ocultarMsg('slider-msg');
 
@@ -662,6 +749,10 @@
       sliderItems[i].URL = normalizarUrlImagen(sliderItems[i].URL);
       if (!sliderItems[i].URL) {
         mostrarMsg('slider-msg', 'La imagen ' + (i + 1) + ' no tiene URL.', 'error');
+        return;
+      }
+      if (!urlValida(sliderItems[i].URL)) {
+        mostrarMsg('slider-msg', 'La imagen ' + (i + 1) + ' tiene una URL no válida (debe empezar por http://, https:// o /).', 'error');
         return;
       }
     }
@@ -678,8 +769,7 @@
       });
 
       if (sesionInvalida(res)) {
-        await salir();
-        mostrarMsg('login-msg', 'Tu sesión caducó. Vuelve a entrar.', 'error');
+        volverAlLogin('Tu sesión caducó. Vuelve a entrar.');
         return;
       }
 
@@ -697,10 +787,8 @@
   }
 
   // ============================================
-  // SUBIDA DE FOTOS A DRIVE
+  // SUBIDA DE FOTOS
   // ============================================
-  let destinoSubida = 'slider';
-
   function pedirFoto(destino) {
     destinoSubida = destino;
     const input = document.getElementById('subida-archivo');
@@ -708,17 +796,7 @@
     input.click();
   }
 
-  function uuidV4() {
-    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-      return window.crypto.randomUUID();
-    }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      const r = Math.random() * 16 | 0;
-      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-  }
-
-  /** Reduce la foto para que suba rápido y no pese (máx. 1600 px de lado). */
+  /** Reduce la foto para que suba rápido (máx. 1600 px de lado). */
   async function comprimirImagen(archivo, maxLado, calidad) {
     maxLado = maxLado || 1600;
     calidad = calidad || 0.85;
@@ -726,20 +804,17 @@
     if (!/^image\//.test(archivo.type || '')) {
       throw new Error('Ese archivo no es una imagen.');
     }
-    // Los GIF animados se envían tal cual para no perder la animación
+    // Los GIF animados se envían tal cual
     if (archivo.type === 'image/gif') return archivo;
 
+    const url = URL.createObjectURL(archivo);
     try {
-      const url = URL.createObjectURL(archivo);
       const img = new Image();
-
       await new Promise(function (res, rej) {
         img.onload = res;
         img.onerror = rej;
         img.src = url;
       });
-
-      URL.revokeObjectURL(url);
 
       const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
       const ancho = Math.max(1, Math.round(img.width * escala));
@@ -751,336 +826,4 @@
       lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
 
       const reducida = await new Promise(function (res) {
-        lienzo.toBlob(res, 'image/jpeg', calidad);
-      });
-
-      if (!reducida) return archivo;
-
-      const nombre = (archivo.name || 'foto').replace(/\.[^.]+$/, '') + '.jpg';
-      return new File([reducida], nombre, { type: 'image/jpeg' });
-    } catch (e) {
-      // Formatos que el navegador no sabe dibujar (p. ej. HEIC): se sube el original
-      return archivo;
-    }
-  }
-
-  /**
-   * Envía la foto con un formulario oculto (los formularios no fallan por CORS)
-   * y espera el resultado consultando el servidor.
-   */
-  function subirArchivo(archivo) {
-    return new Promise(function (resolve, reject) {
-      if (!tokenAdmin) { reject(new Error('Tu sesión caducó. Vuelve a entrar.')); return; }
-
-      const id = uuidV4();
-      const form = document.getElementById('form-subida');
-      const input = document.getElementById('subida-archivo');
-
-      document.getElementById('subida-token').value = tokenAdmin;
-      document.getElementById('subida-id').value = id;
-
-      try {
-        const dt = new DataTransfer();
-        dt.items.add(new File([archivo], archivo.name || 'foto.jpg', { type: archivo.type || 'image/jpeg' }));
-        input.files = dt.files;
-      } catch (e) {
-        reject(new Error('Tu navegador no permite subir la foto. Usa el enlace manual.'));
-        return;
-      }
-
-      form.action = APPS_SCRIPT_URL;
-      form.submit();
-
-      let intentos = 0;
-      const temporizador = setInterval(async function () {
-        intentos++;
-
-        if (intentos > 60) {
-          clearInterval(temporizador);
-          reject(new Error('La subida tardó demasiado. Comprueba tu conexión.'));
-          return;
-        }
-
-        try {
-          const res = await jsonpRequest({ action: 'uploadStatus', id: id });
-          if (res && res.success === true && res.url) {
-            clearInterval(temporizador);
-            resolve(res.url);
-          } else if (res && res.success === false) {
-            clearInterval(temporizador);
-            reject(new Error(res.error || 'No se pudo subir la foto.'));
-          }
-        } catch (e) {
-          // seguimos intentando
-        }
-      }, 1500);
-    });
-  }
-
-  async function procesarFotos(input) {
-    const archivos = Array.prototype.slice.call(input.files || []);
-    input.value = '';
-    if (!archivos.length) return;
-
-    const esSlider = destinoSubida === 'slider';
-    const msgId = esSlider ? 'slider-msg' : 'panel-msg';
-    const limite = esSlider ? 10 : 8;
-
-    for (let i = 0; i < archivos.length; i++) {
-      const cuantas = esSlider ? sliderItems.length : imagenesActuales.length;
-      if (cuantas >= limite) {
-        mostrarMsg(msgId, 'Máximo ' + limite + ' fotos.', 'error');
-        break;
-      }
-
-      try {
-        mostrarMsg(msgId, '⏳ Subiendo ' + (i + 1) + ' de ' + archivos.length + '...', 'ok');
-
-        const reducida = await comprimirImagen(archivos[i]);
-        const url = await subirArchivo(reducida);
-
-        if (esSlider) {
-          sliderItems.push({ ID: '', URL: url, Titulo: '', Activo: true });
-          renderizarSlider();
-          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar slider" para publicarla.', 'ok');
-        } else {
-          imagenesActuales.push(url);
-          renderizarGaleria();
-          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar Cambios del Producto" para publicarla.', 'ok');
-        }
-      } catch (e) {
-        mostrarMsg(msgId, e.message || 'No se pudo subir la foto.', 'error');
-      }
-    }
-  }
-
-  async function salir() {
-    const t = tokenAdmin;
-    guardarToken('');
-    document.getElementById('panel-section').classList.add('hidden');
-    document.getElementById('login-section').classList.remove('hidden');
-    ocultarMsg('panel-msg');
-    ocultarMsg('slider-msg');
-    sliderItems = [];
-    if (t) {
-      try { await jsonpRequest({ action: 'logout', token: t }); } catch (e) { }
-    }
-  }
-
-  // Restaurar sesión al recargar
-  window.addEventListener('DOMContentLoaded', async function () {
-    const guardado = leerToken();
-    if (!guardado) return;
-
-    tokenAdmin = guardado;
-    try {
-      await entrarAlPanel();
-    } catch (e) {
-      guardarToken('');
-    }
-  });
-
-  // ============================================
-  // FORMULARIO DE PRODUCTO
-  // ============================================
-  function cargarProducto() {
-    const id = document.getElementById('select-product').value;
-
-    if (!id) {
-      document.getElementById('p-id').value = '';
-      document.getElementById('p-nombre').value = '';
-      document.getElementById('p-precio').value = '';
-      document.getElementById('p-desc').value = '';
-      document.getElementById('p-ingredientes').value = '';
-      document.getElementById('p-categoria').value = 'Pizzas';
-      document.getElementById('p-disponible').value = 'si';
-      imagenesActuales = [];
-      renderizarGaleria();
-      return;
-    }
-
-    const p = productosGlobal.find(function (x) { return String(x.ID) === String(id); });
-    if (!p) return;
-
-    document.getElementById('p-id').value = p.ID || '';
-    document.getElementById('p-nombre').value = p.Nombre || '';
-    document.getElementById('p-categoria').value = p.Categoria || '';
-    document.getElementById('p-precio').value = p.Precio != null ? p.Precio : '';
-    document.getElementById('p-desc').value = p.Descripcion || '';
-    document.getElementById('p-ingredientes').value = p.Ingredientes || '';
-
-    const disp = String(p.Disponible).trim().toLowerCase();
-    document.getElementById('p-disponible').value = (disp === 'si' || disp === 'true' || p.Disponible === true) ? 'si' : 'no';
-
-    const raw = p.ImagenURL || p.Imagen || '';
-    imagenesActuales = String(raw).split(',').map(function (u) { return u.trim(); }).filter(Boolean);
-    renderizarGaleria();
-  }
-
-  function renderizarGaleria() {
-    const galeria = document.getElementById('galeria-imagenes');
-    galeria.innerHTML = '';
-
-    if (imagenesActuales.length === 0) {
-      galeria.innerHTML = '<p style="font-size:12px; color:#95a5a6; width:100%;">Aún no hay imágenes en el carrusel.</p>';
-      return;
-    }
-
-    imagenesActuales.forEach(function (url, index) {
-      const div = document.createElement('div');
-      div.className = 'img-item';
-
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = '';
-      img.onerror = function () { img.style.background = '#eee'; };
-
-      const btn = document.createElement('button');
-      btn.textContent = 'X';
-      btn.title = 'Eliminar';
-      btn.onclick = function () { eliminarImagen(index); };
-
-      div.appendChild(img);
-      div.appendChild(btn);
-      galeria.appendChild(div);
-    });
-  }
-
-  function agregarImagen() {
-    const input = document.getElementById('nueva-imagen-url');
-    const url = input.value.trim();
-
-    if (!url) return;
-    if (!/^https?:\/\/\S+$/i.test(url)) {
-      alert('La imagen debe ser una URL que empiece por http:// o https://');
-      return;
-    }
-    if (imagenesActuales.length >= 8) {
-      alert('Máximo 8 imágenes por producto.');
-      return;
-    }
-
-    imagenesActuales.push(url);
-    input.value = '';
-    renderizarGaleria();
-  }
-
-  function eliminarImagen(index) {
-    imagenesActuales.splice(index, 1);
-    renderizarGaleria();
-  }
-
-  async function guardarProducto() {
-    const btn = document.getElementById('btn-guardar');
-    const original = btn.textContent;
-
-    const precio = precioNum(document.getElementById('p-precio').value);
-
-    const prod = {
-      ID: document.getElementById('p-id').value.trim().toUpperCase(),
-      Nombre: document.getElementById('p-nombre').value.trim(),
-      Categoria: document.getElementById('p-categoria').value.trim(),
-      Precio: precio,
-      Descripcion: document.getElementById('p-desc').value.trim(),
-      Ingredientes: document.getElementById('p-ingredientes').value.trim(),
-      ImagenURL: imagenesActuales.join(','),
-      Disponible: document.getElementById('p-disponible').value
-    };
-
-    if (!prod.ID) { mostrarMsg('panel-msg', 'El ID es obligatorio.', 'error'); return; }
-    if (!/^[A-Za-z0-9_-]{1,20}$/.test(prod.ID)) {
-      mostrarMsg('panel-msg', 'El ID solo admite letras, números, guion y guion bajo.', 'error');
-      return;
-    }
-    if (!prod.Nombre) { mostrarMsg('panel-msg', 'El nombre es obligatorio.', 'error'); return; }
-    if (isNaN(precio) || precio < 0) {
-      mostrarMsg('panel-msg', 'El precio no es válido. Usa por ejemplo 12.50 o 12,50.', 'error');
-      return;
-    }
-
-    document.getElementById('p-id').value = prod.ID;
-
-    btn.disabled = true;
-    btn.textContent = 'Guardando...';
-    ocultarMsg('panel-msg');
-
-    try {
-      const res = await jsonpRequest({
-        action: 'saveProduct',
-        token: tokenAdmin,
-        productData: JSON.stringify(prod)
-      });
-
-      if (sesionInvalida(res)) {
-        guardarToken('');
-        document.getElementById('panel-section').classList.add('hidden');
-        document.getElementById('login-section').classList.remove('hidden');
-        mostrarMsg('login-msg', 'Tu sesión caducó. Vuelve a entrar.', 'error');
-        return;
-      }
-
-      if (res && res.success) {
-        await entrarAlPanel();
-        document.getElementById('select-product').value = prod.ID;
-        cargarProducto();
-        mostrarMsg('panel-msg', res.message || 'Guardado.', 'ok');
-      } else {
-        mostrarMsg('panel-msg', 'Error: ' + ((res && res.error) || 'no se pudo guardar.'), 'error');
-      }
-    } catch (e) {
-      mostrarMsg('panel-msg', 'Error de conexión: ' + (e.message || ''), 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = original;
-    }
-  }
-
-  async function toggleStripe() {
-    const check = document.getElementById('config-stripe');
-    const isChecked = check.checked;
-    check.disabled = true;
-
-    try {
-      const res = await jsonpRequest({
-        action: 'saveConfig',
-        token: tokenAdmin,
-        stripe: isChecked
-      });
-
-      if (sesionInvalida(res)) {
-        guardarToken('');
-        document.getElementById('panel-section').classList.add('hidden');
-        document.getElementById('login-section').classList.remove('hidden');
-        mostrarMsg('login-msg', 'Tu sesión caducó. Vuelve a entrar.', 'error');
-        check.checked = !isChecked;
-        return;
-      }
-
-      if (res && res.success) {
-        alert(isChecked
-          ? '✅ Pago con tarjeta ACTIVADO en la web.'
-          : '⚠️ Pago con tarjeta DESACTIVADO. Se coordinará por WhatsApp.');
-      } else {
-        alert('Error: ' + ((res && res.error) || 'no se pudo guardar.'));
-        check.checked = !isChecked;
-      }
-    } catch (e) {
-      alert('Error de conexión: ' + (e.message || ''));
-      check.checked = !isChecked;
-    } finally {
-      check.disabled = false;
-    }
-  }
-</script>
-
-<!-- Subida de fotos: formulario oculto + iframe (no usa CORS) -->
-<form id="form-subida" method="POST" enctype="multipart/form-data" target="ifr-subida" style="display: none;">
-  <input type="hidden" name="action" value="uploadImage">
-  <input type="hidden" name="token" id="subida-token" value="">
-  <input type="hidden" name="id" id="subida-id" value="">
-  <input type="file" name="archivo" id="subida-archivo" accept="image/*" multiple onchange="procesarFotos(this)">
-</form>
-<iframe name="ifr-subida" id="ifr-subida" title="subida" style="display: none;"></iframe>
-
-</body>
-</html>
+        lienzo.toBlob(res, 'image/j
