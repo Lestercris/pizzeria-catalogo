@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Administración</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    .container { max-width: 700px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    input, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    button { background: #c0392b; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #a93226; }
+    .btn-small { width: auto; padding: 5px 10px; font-size: 12px; background: #3498db; margin-top: 5px;}
+    .btn-delete { background: #e74c3c; }
+    .hidden { display: none; }
+    .msg { margin-top: 10px; padding: 10px; border-radius: 5px; display: none; }
+    .msg.ok { background: #d4edda; color: #155724; display: block; }
+    .msg.error { background: #f8d7da; color: #721c24; display: block; }
+    
+    /* Estilos para el gestor de imágenes */
+    .galeria-admin { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+    .img-item { position: relative; width: 100px; height: 100px; border-radius: 5px; overflow: hidden; border: 2px solid #ddd; }
+    .img-item img { width: 100%; height: 100%; object-fit: cover; }
+    .img-item button { position: absolute; top: 2px; right: 2px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; padding: 0; font-weight: bold; }
+    .input-group { display: flex; gap: 10px; }
+    .input-group input { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+<div class="container" id="login-section">
+  <h2>Acceso Administrador</h2>
+  <input type="password" id="admin-pass" placeholder="Contraseña">
+  <button onclick="login()">Entrar</button>
+  <div id="login-msg" class="msg error"></div>
+</div>
+
+<div class="container hidden" id="panel-section">
+  <h2>Gestión de Productos</h2>
+  
+  <label>Seleccionar Producto para Editar (o dejar en blanco para Nuevo):</label>
+  <select id="select-product" onchange="cargarProducto()">
+    <option value="">-- Crear Nuevo Producto --</option>
+  </select>
+
+  <input type="text" id="p-id" placeholder="ID (Ej. P07)" required>
+  <input type="text" id="p-nombre" placeholder="Nombre" required>
+  <input type="text" id="p-categoria" placeholder="Categoría" value="Pizzas">
+  <input type="number" id="p-precio" placeholder="Precio (Ej. 12.50)" step="0.01" required>
+  <input type="text" id="p-desc" placeholder="Descripción corta">
+  <input type="text" id="p-ingredientes" placeholder="Ingredientes">
+  
+  <label>Disponible:</label>
+  <select id="p-disponible">
+    <option value="si">Sí</option>
+    <option value="no">No</option>
+  </select>
+
+  <!-- GESTOR DE CARRUSEL -->
+  <div style="border: 2px dashed #ccc; padding: 15px; border-radius: 8px; background: #fafafa; margin-bottom: 15px;">
+    <h3 style="margin-top:0; font-size: 16px;">📸 Imágenes del Carrusel</h3>
+    <div class="galeria-admin" id="galeria-imagenes"></div>
+    
+    <div class="input-group">
+      <input type="url" id="nueva-imagen-url" placeholder="Pega la URL de la imagen (https://...)">
+      <button class="btn-small" onclick="agregarImagen()" style="background:#27ae60;">Añadir</button>
+    </div>
+  </div>
+  
+  <button onclick="guardarProducto()">Guardar Producto</button>
+  <div id="panel-msg" class="msg"></div>
+</div>
+
+<script>
+  // ⚠️ REEMPLAZA ESTO CON TU URL DE APPS SCRIPT
+  const APPS_SCRIPT_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI'; 
+  let productosGlobal = [];
+  let passwordAdmin = '';
+  let imagenesActuales = []; // Array que guarda las URLs mientras editas
+
+  function jsonpRequest(params) {
+    return new Promise((resolve, reject) => {
+      const cb = 'cb_' + Date.now();
+      window[cb] = (data) => {
+        delete window[cb];
+        document.body.removeChild(script);
+        resolve(data);
+      };
+      const query = new URLSearchParams({ ...params, callback: cb }).toString();
+      const script = document.createElement('script');
+      script.src = APPS_SCRIPT_URL + '?' + query;
+      script.onerror = () => { delete window[cb]; reject(new Error('Network error')); };
+      document.body.appendChild(script);
+    });
+  }
+
+  async function login() {
+    passwordAdmin = document.getElementById('admin-pass').value;
+    try {
+      const res = await jsonpRequest({ action: 'getProducts' });
+      document.getElementById('login-section').classList.add('hidden');
+      document.getElementById('panel-section').classList.remove('hidden');
+      productosGlobal = res;
+      
+      const select = document.getElementById('select-product');
+      res.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.ID;
+        opt.textContent = p.ID + ' - ' + p.Nombre;
+        select.appendChild(opt);
+      });
+    } catch (e) {
+      document.getElementById('login-msg').textContent = 'Error de conexión';
+    }
+  }
+
+  function cargarProducto() {
+    const id = document.getElementById('select-product').value;
+    if (!id) {
+      // Limpiar formulario para nuevo
+      document.getElementById('p-id').value = '';
+      document.getElementById('p-nombre').value = '';
+      document.getElementById('p-precio').value = '';
+      document.getElementById('p-desc').value = '';
+      document.getElementById('p-ingredientes').value = '';
+      imagenesActuales = [];
+      renderizarGaleria();
+      return;
+    }
+    const p = productosGlobal.find(x => String(x.ID) === String(id));
+    if (p) {
+      document.getElementById('p-id').value = p.ID;
+      document.getElementById('p-nombre').value = p.Nombre;
+      document.getElementById('p-categoria').value = p.Categoria;
+      document.getElementById('p-precio').value = p.Precio;
+      document.getElementById('p-desc').value = p.Descripcion;
+      document.getElementById('p-ingredientes').value = p.Ingredientes;
+      document.getElementById('p-disponible').value = String(p.Disponible).toLowerCase() === 'si' ? 'si' : 'no';
+      
+      // Cargar imágenes separadas por coma
+      if (p.ImagenURL) {
+        imagenesActuales = String(p.ImagenURL).split(',').map(url => url.trim()).filter(url => url !== '');
+      } else {
+        imagenesActuales = [];
+      }
+      renderizarGaleria();
+    }
+  }
+
+  // --- LÓGICA DEL CARRUSEL ---
+  function renderizarGaleria() {
+    const galeria = document.getElementById('galeria-imagenes');
+    galeria.innerHTML = '';
+    
+    if (imagenesActuales.length === 0) {
+      galeria.innerHTML = '<p style="font-size:12px; color:#888;">No hay imágenes. Añade una URL abajo.</p>';
+      return;
+    }
+
+    imagenesActuales.forEach((url, index) => {
+      const div = document.createElement('div');
+      div.className = 'img-item';
+      div.innerHTML = `
+        <img src="${url}" onerror="this.src='https://via.placeholder.com/100?text=Error'">
+        <button onclick="eliminarImagen(${index})" title="Eliminar">X</button>
+      `;
+      galeria.appendChild(div);
+    });
+  }
+
+  function agregarImagen() {
+    const input = document.getElementById('nueva-imagen-url');
+    const url = input.value.trim();
+    if (url) {
+      imagenesActuales.push(url);
+      input.value = ''; // Limpiar input
+      renderizarGaleria();
+    }
+  }
+
+  function eliminarImagen(index) {
+    imagenesActuales.splice(index, 1);
+    renderizarGaleria();
+  }
+
+  // --- GUARDAR EN GOOGLE SHEETS ---
+  async function guardarProducto() {
+    const prod = {
+      ID: document.getElementById('p-id').value,
+      Nombre: document.getElementById('p-nombre').value,
+      Categoria: document.getElementById('p-categoria').value,
+      Precio: document.getElementById('p-precio').value,
+      Descripcion: document.getElementById('p-desc').value,
+      Ingredientes: document.getElementById('p-ingredientes').value,
+      ImagenURL: imagenesActuales.join(','), // Unimos el array con comas
+      Disponible: document.getElementById('p-disponible').value
+    };
+
+    try {
+      const res = await jsonpRequest({ 
+        action: 'saveProduct', 
+        password: passwordAdmin,
+        productData: JSON.stringify(prod)
+      });
+
+      const msg = document.getElementById('panel-msg');
+      if (res.success) {
+        msg.textContent = res.message;
+        msg.className = 'msg ok';
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        msg.textContent = 'Error: ' + res.error;
+        msg.className = 'msg error';
+      }
+    } catch (e) {
+      alert('Error al guardar');
+    }
+  }
+</script>
+  <!-- Botón Flotante de WhatsApp -->
+<a href="https://wa.me/34642782116?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzería%20Bella%20Napoli" 
+   target="_blank" 
+   style="position: fixed; bottom: 20px; right: 20px; background: #25D366; color: white; 
+          border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; 
+          justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; 
+          text-decoration: none; font-size: 35px;">
+   <svg viewBox="0 0 24 24" width="35" height="35" fill="currentColor">
+     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.602 2.664-.699c.974.532 1.853.813 2.796.813 3.181 0 5.768-2.586 5.769-5.767.001-3.181-2.586-5.768-5.769-5.768zm3.362 7.966c-.133.372-.771.723-1.06.75-.288.028-.573.136-1.774-.474-1.451-.736-2.389-2.25-2.461-2.35-.071-.1-.564-.75-.564-1.43 0-.682.354-1.018.481-1.153.127-.136.276-.17.368-.17.092 0 .184.001.263.005.085.004.201-.032.313.239.112.272.381.93.414 1.003.033.072.055.156.009.247-.046.092-.091.148-.182.252-.091.104-.191.233-.273.313-.091.088-.186.184-.08.368.106.184.47.775 1.007 1.254.688.612 1.269.8 1.451.889.182.089.289.074.396-.045.107-.119.458-.533.58-.717.122-.184.243-.153.409-.092.166.061 1.053.496 1.234.586.182.091.303.136.348.213.045.077.045.447-.088.819z"></path>
+   </svg>
+</a>
+</body>
+</html>
