@@ -340,8 +340,10 @@
 
   <script>
     // ============================================
-    // ⚙️ CONFIGURACIÓN - REEMPLAZA CON TU URL
+    // ⚙️ CONFIGURACIÓN - REEMPLAZA CON TU URL REAL
     // ============================================
+    // ¡OJO! Asegúrate de que esta URL sea la de tu implementación actual
+    // (Debe terminar en /exec)
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzU3mDk1cLrvypMfgeXP-mRcCgliyrL1eZkZBi8Sl-OO5ZG6b5lg4Dcfm6mdMvv0-JkAw/exec';
 
     // ============================================
@@ -702,7 +704,7 @@
           return;
         }
 
-        // --- NUEVO: Detectar si es el aviso de pedido duplicado ---
+        // --- Detectar si es el aviso de pedido duplicado ---
         if (!respuesta.success && respuesta.error && respuesta.error.indexOf('ya se ha registrado') !== -1) {
           mostrarMensaje(respuesta.error, 'ok'); // Se muestra en verde
           carrito = {};
