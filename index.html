@@ -165,91 +165,19 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Slider de portada */
-    .hero {
-      max-width: 1200px;
-      margin: 22px auto 0;
-      padding: 0 20px;
-    }
+    .hero { max-width: 1200px; margin: 22px auto 0; padding: 0 20px; }
     .hero[hidden] { display: none; }
-
-    .hero-track {
-      position: relative;
-      width: 100%;
-      height: 340px;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #eee;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.16);
-      touch-action: pan-y;
-    }
-
-    .hero-slide {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 0.7s ease;
-      pointer-events: none;
-    }
+    .hero-track { position: relative; width: 100%; height: 340px; border-radius: 16px; overflow: hidden; background: #eee; box-shadow: 0 10px 28px rgba(0,0,0,0.16); touch-action: pan-y; }
+    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; pointer-events: none; }
     .hero-slide.on { opacity: 1; pointer-events: auto; }
-    .hero-slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .hero-cap {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      padding: 46px 24px 18px;
-      background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0));
-      color: #fff;
-      font-size: 1.15rem;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-    }
-
-    .hero-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 0;
-      background: rgba(255,255,255,0.9);
-      color: #c0392b;
-      font-size: 26px;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      transition: background 0.2s, transform 0.15s;
-      z-index: 2;
-    }
+    .hero-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 46px 24px 18px; background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0)); color: #fff; font-size: 1.15rem; font-weight: 600; letter-spacing: 0.2px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+    .hero-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 0; background: rgba(255,255,255,0.9); color: #c0392b; font-size: 26px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: background 0.2s, transform 0.15s; z-index: 2; }
     .hero-btn:hover { background: #fff; transform: translateY(-50%) scale(1.06); }
     .hero-btn.prev { left: 14px; }
     .hero-btn.next { right: 14px; }
-
-    .hero-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .hero-dots button {
-      width: 10px;
-      height: 10px;
-      padding: 0;
-      border: 0;
-      border-radius: 50%;
-      background: #d8d8d8;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
-    }
+    .hero-dots { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+    .hero-dots button { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 50%; background: #d8d8d8; cursor: pointer; transition: background 0.2s, transform 0.2s; }
     .hero-dots button.on { background: #c0392b; transform: scale(1.25); }
 
     @media (max-width: 700px) {
@@ -260,23 +188,7 @@
     }
 
     /* Botón flotante WhatsApp */
-    .wa-float {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #25D366;
-      color: white;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      z-index: 1000;
-      text-decoration: none;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
+    .wa-float { position: fixed; bottom: 20px; right: 20px; background: #25D366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
     .wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
   </style>
 </head>
@@ -287,7 +199,6 @@
     <p>Auténtica pizza, hecha con amor</p>
   </header>
 
-  <!-- Slider de portada (se oculta solo si no hay imágenes) -->
   <section class="hero" id="hero" hidden>
     <div class="hero-track" id="heroTrack">
       <div id="heroSlides"></div>
@@ -327,95 +238,46 @@
     </aside>
   </div>
 
-  <!-- Botón Flotante de WhatsApp -->
   <a href="https://wa.me/346601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
-     target="_blank"
-     rel="noopener noreferrer"
-     aria-label="Contactar por WhatsApp"
-     class="wa-float">
+     target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp" class="wa-float">
     <svg viewBox="0 0 24 24" width="35" height="35" fill="currentColor" aria-hidden="true">
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
     </svg>
   </a>
 
   <script>
-    // ============================================
-    // ⚙️ CONFIGURACIÓN - REEMPLAZA CON TU URL
-    // ============================================
+    // ⚙️ CONFIGURACIÓN - ASEGÚRATE DE QUE ESTA ES TU URL REAL
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyo5Tv2if3uFBzYG1wyuOsEe-dZ9nblnHoQW6fUcuecx9nQ5dw0DNAtOiWFdB46BGCU-A/exec';
 
-    // ============================================
-    // CONSTANTES Y ESTADO GLOBAL
-    // ============================================
     const MONEDA = '€';
-
-    const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160">' +
-      '<rect width="100%" height="100%" fill="#f1f1f1"/>' +
-      '<text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text>' +
-      '</svg>'
-    );
+    const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160"><rect width="100%" height="100%" fill="#f1f1f1"/><text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text></svg>');
 
     let productos = [];
     let carrito = {};
     let stripeHabilitado = false;
 
-    // ============================================
-    // UTILIDADES
-    // ============================================
-    function moneda(n) {
-      return MONEDA + (Number(n) || 0).toFixed(2);
-    }
-
+    function moneda(n) { return MONEDA + (Number(n) || 0).toFixed(2); }
     let contadorCb = 0;
-
-    function nombreCb(prefijo) {
-      contadorCb += 1;
-      return prefijo + '_' + Date.now() + '_' + contadorCb;
-    }
+    function nombreCb(prefijo) { contadorCb += 1; return prefijo + '_' + Date.now() + '_' + contadorCb; }
 
     function jsonp(action, onData, onError) {
       const cb = nombreCb('cb_' + action);
       const script = document.createElement('script');
-
-      function cleanup() {
-        try { delete window[cb]; } catch (e) { window[cb] = undefined; }
-        if (script.parentNode) script.parentNode.removeChild(script);
-      }
-
-      window[cb] = function (data) {
-        cleanup();
-        if (typeof onData === 'function') onData(data);
-      };
-
-      script.onerror = function () {
-        cleanup();
-        if (typeof onError === 'function') onError();
-      };
-
+      function cleanup() { try { delete window[cb]; } catch (e) { window[cb] = undefined; } if (script.parentNode) script.parentNode.removeChild(script); }
+      window[cb] = function (data) { cleanup(); if (typeof onData === 'function') onData(data); };
+      script.onerror = function () { cleanup(); if (typeof onError === 'function') onError(); };
       script.src = APPS_SCRIPT_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cb;
       document.body.appendChild(script);
     }
 
-    function esc(txt) {
-      return String(txt == null ? '' : txt).replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
-    }
+    function esc(txt) { return String(txt == null ? '' : txt).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
     function precioNum(valor) {
       if (typeof valor === 'number') return isFinite(valor) ? valor : 0;
       let s = String(valor == null ? '' : valor).replace(/[^\d.,-]/g, '');
       if (!s) return 0;
-      if (s.indexOf(',') > -1 && s.indexOf('.') > -1) {
-        s = s.lastIndexOf(',') > s.lastIndexOf('.')
-          ? s.replace(/\./g, '').replace(',', '.')
-          : s.replace(/,/g, '');
-      } else {
-        s = s.replace(',', '.');
-      }
-      const n = parseFloat(s);
-      return isNaN(n) ? 0 : n;
+      if (s.indexOf(',') > -1 && s.indexOf('.') > -1) { s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, ''); } else { s = s.replace(',', '.'); }
+      const n = parseFloat(s); return isNaN(n) ? 0 : n;
     }
 
     function esVisible(p) {
@@ -426,354 +288,117 @@
       return t === 'si' || t === 'sí' || t === 'true' || t === 'verdadero' || t === '1';
     }
 
-    function imagenesDe(p) {
-      const raw = p.ImagenURL || p.Imagen || '';
-      return String(raw).split(',').map(function (u) { return u.trim(); }).filter(function (u) { return u !== ''; });
-    }
+    function imagenesDe(p) { const raw = p.ImagenURL || p.Imagen || ''; return String(raw).split(',').map(function (u) { return u.trim(); }).filter(function (u) { return u !== ''; }); }
 
-    // ============================================
-    // 1. CARGAR PRODUCTOS
-    // ============================================
-    function cargarProductos() {
-      jsonp('getProducts', function (data) {
-        mostrarProductos(data);
-      }, function () {
-        document.getElementById('catalogo').innerHTML =
-          '<p style="color:red">Error al cargar el menú. Verifica tu conexión.</p>';
-      });
-    }
+    function cargarProductos() { jsonp('getProducts', function (data) { mostrarProductos(data); }, function () { document.getElementById('catalogo').innerHTML = '<p style="color:red">Error al cargar el menú. Verifica tu conexión.</p>'; }); }
+    function cargarConfig() { jsonp('getConfig', function (data) { stripeHabilitado = !!(data && (data.StripeHabilitado === true || String(data.StripeHabilitado).toLowerCase() === 'true')); }, function () {}); }
 
-    function cargarConfig() {
-      jsonp('getConfig', function (data) {
-        stripeHabilitado = !!(data && (data.StripeHabilitado === true || String(data.StripeHabilitado).toLowerCase() === 'true'));
-      }, function () {});
-    }
-
-    // ============================================
-    // 1.d SLIDER DE PORTADA
-    // ============================================
-    let slides = [];
-    let slideActual = 0;
-    let slideTimer = null;
-
-    function cargarSlider() {
-      jsonp('getSlider', function (data) {
-        mostrarSlider(Array.isArray(data) ? data : []);
-      }, function () {});
-    }
-
+    let slides = [], slideActual = 0, slideTimer = null;
+    function cargarSlider() { jsonp('getSlider', function (data) { mostrarSlider(Array.isArray(data) ? data : []); }, function () {}); }
     function mostrarSlider(lista) {
-      const hero = document.getElementById('hero');
-      const cont = document.getElementById('heroSlides');
-      const dots = document.getElementById('heroDots');
-
+      const hero = document.getElementById('hero'), cont = document.getElementById('heroSlides'), dots = document.getElementById('heroDots');
       slides = lista.filter(function (s) { return s && s.URL; });
       if (!slides.length) { hero.hidden = true; return; }
-
       cont.innerHTML = slides.map(function (s, i) {
-        return '<div class="hero-slide' + (i === 0 ? ' on' : '') + '">' +
-          '<img src="' + esc(s.URL) + '" alt="' + esc(s.Titulo || '') + '" ' +
-          (i === 0 ? '' : 'loading="lazy" ') +
-          'onerror="this.onerror=null;this.src=\'' + IMG_PLACEHOLDER + '\'">' +
-          (s.Titulo ? '<div class="hero-cap">' + esc(s.Titulo) + '</div>' : '') +
-          '</div>';
+        return '<div class="hero-slide' + (i === 0 ? ' on' : '') + '"><img src="' + esc(s.URL) + '" alt="' + esc(s.Titulo || '') + '" ' + (i === 0 ? '' : 'loading="lazy" ') + 'onerror="this.onerror=null;this.src=\'' + IMG_PLACEHOLDER + '\'">' + (s.Titulo ? '<div class="hero-cap">' + esc(s.Titulo) + '</div>' : '') + '</div>';
       }).join('');
-
-      dots.innerHTML = slides.map(function (_, i) {
-        return '<button type="button" aria-label="Ir a la imagen ' + (i + 1) + '" onclick="irASlide(' + i + ')"></button>';
-      }).join('');
-
-      hero.hidden = false;
-      slideActual = 0;
-      pintarSlide();
-      iniciarAuto();
-      prepararSwipe();
+      dots.innerHTML = slides.map(function (_, i) { return '<button type="button" aria-label="Ir a la imagen ' + (i + 1) + '" onclick="irASlide(' + i + ')"></button>'; }).join('');
+      hero.hidden = false; slideActual = 0; pintarSlide(); iniciarAuto(); prepararSwipe();
     }
-
     function pintarSlide() {
-      const imgs = document.querySelectorAll('#heroSlides .hero-slide');
-      const puntos = document.querySelectorAll('#heroDots button');
+      const imgs = document.querySelectorAll('#heroSlides .hero-slide'), puntos = document.querySelectorAll('#heroDots button');
       for (let i = 0; i < imgs.length; i++) imgs[i].classList.toggle('on', i === slideActual);
       for (let i = 0; i < puntos.length; i++) puntos[i].classList.toggle('on', i === slideActual);
     }
-
-    function irASlide(i) {
-      if (!slides.length) return;
-      slideActual = (i + slides.length) % slides.length;
-      pintarSlide();
-      iniciarAuto();
-    }
-
+    function irASlide(i) { if (!slides.length) return; slideActual = (i + slides.length) % slides.length; pintarSlide(); iniciarAuto(); }
     function moverSlider(dir) { irASlide(slideActual + dir); }
-
-    function iniciarAuto() {
-      detenerAuto();
-      if (slides.length < 2) return;
-      slideTimer = setInterval(function () { moverSlider(1); }, 5000);
-    }
-
-    function detenerAuto() {
-      if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
-    }
-
+    function iniciarAuto() { detenerAuto(); if (slides.length < 2) return; slideTimer = setInterval(function () { moverSlider(1); }, 5000); }
+    function detenerAuto() { if (slideTimer) { clearInterval(slideTimer); slideTimer = null; } }
     function prepararSwipe() {
-      const track = document.getElementById('heroTrack');
-      if (!track || track.dataset.swipe) return;
-      track.dataset.swipe = '1';
-
+      const track = document.getElementById('heroTrack'); if (!track || track.dataset.swipe) return; track.dataset.swipe = '1';
       let x0 = null;
-      track.addEventListener('touchstart', function (e) {
-        x0 = e.touches[0].clientX;
-        detenerAuto();
-      }, { passive: true });
-
-      track.addEventListener('touchend', function (e) {
-        if (x0 === null) return;
-        const dx = e.changedTouches[0].clientX - x0;
-        x0 = null;
-        if (Math.abs(dx) > 40) moverSlider(dx < 0 ? 1 : -1);
-      }, { passive: true });
-
-      track.addEventListener('mouseenter', detenerAuto);
-      track.addEventListener('mouseleave', iniciarAuto);
+      track.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; detenerAuto(); }, { passive: true });
+      track.addEventListener('touchend', function (e) { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) moverSlider(dx < 0 ? 1 : -1); }, { passive: true });
+      track.addEventListener('mouseenter', detenerAuto); track.addEventListener('mouseleave', iniciarAuto);
     }
 
-    // ============================================
-    // 1.c PINTAR EL CATÁLOGO
-    // ============================================
     function mostrarProductos(lista) {
       const cont = document.getElementById('catalogo');
-
-      if (!Array.isArray(lista)) {
-        cont.innerHTML = '<p style="color:#c0392b">El servidor devolvió una respuesta no válida.</p>';
-        return;
-      }
-
-      productos = lista.filter(function (p) {
-        return esVisible(p) && precioNum(p.Precio) > 0;
-      });
-
-      if (!productos.length) {
-        cont.innerHTML = '<p style="color:#999">No hay productos disponibles ahora mismo.</p>';
-        return;
-      }
-
+      if (!Array.isArray(lista)) { cont.innerHTML = '<p style="color:#c0392b">El servidor devolvió una respuesta no válida.</p>'; return; }
+      productos = lista.filter(function (p) { return esVisible(p) && precioNum(p.Precio) > 0; });
+      if (!productos.length) { cont.innerHTML = '<p style="color:#999">No hay productos disponibles ahora mismo.</p>'; return; }
       cont.innerHTML = productos.map(function (p) {
-        const urls = imagenesDe(p);
-        const placeholder = IMG_PLACEHOLDER;
+        const urls = imagenesDe(p), placeholder = IMG_PLACEHOLDER;
         let imagenes;
-
         if (urls.length > 1) {
-          imagenes =
-            '<div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:5px;padding-bottom:5px;scrollbar-width:none;">' +
-            urls.map(function (url) {
-              return '<img src="' + esc(url) + '" loading="lazy" ' +
-                'style="min-width:100%;height:160px;object-fit:cover;scroll-snap-align:start;border-radius:8px;" ' +
-                'onerror="this.onerror=null;this.src=\'' + placeholder + '\'">';
-            }).join('') +
-            '</div>';
+          imagenes = '<div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:5px;padding-bottom:5px;scrollbar-width:none;">' + urls.map(function (url) {
+            return '<img src="' + esc(url) + '" loading="lazy" style="min-width:100%;height:160px;object-fit:cover;scroll-snap-align:start;border-radius:8px;" onerror="this.onerror=null;this.src=\'' + placeholder + '\'">';
+          }).join('') + '</div>';
         } else {
           const img = urls[0] || placeholder;
-          imagenes = '<img src="' + esc(img) + '" loading="lazy" ' +
-            'style="width:100%;height:160px;object-fit:cover;" ' +
-            'onerror="this.onerror=null;this.src=\'' + placeholder + '\'">';
+          imagenes = '<img src="' + esc(img) + '" loading="lazy" style="width:100%;height:160px;object-fit:cover;" onerror="this.onerror=null;this.src=\'' + placeholder + '\'">';
         }
-
-        return '<article class="producto">' + imagenes +
-          '<div class="producto-body">' +
-            '<h3>' + esc(p.Nombre) + '</h3>' +
-            '<p class="desc">' + esc(p.Descripcion) + '</p>' +
-            '<p class="ingredientes">' + esc(p.Ingredientes) + '</p>' +
-            '<p class="precio">' + moneda(precioNum(p.Precio)) + '</p>' +
-            '<button type="button" onclick="agregarAlCarrito(\'' + esc(p.ID) + '\')">Añadir al carrito</button>' +
-          '</div>' +
-        '</article>';
+        return '<article class="producto">' + imagenes + '<div class="producto-body"><h3>' + esc(p.Nombre) + '</h3><p class="desc">' + esc(p.Descripcion) + '</p><p class="ingredientes">' + esc(p.Ingredientes) + '</p><p class="precio">' + moneda(precioNum(p.Precio)) + '</p><button type="button" onclick="agregarAlCarrito(\'' + esc(p.ID) + '\')">Añadir al carrito</button></div></article>';
       }).join('');
     }
 
-    // ============================================
-    // 2. GESTIÓN DEL CARRITO
-    // ============================================
     function agregarAlCarrito(id) {
       const p = productos.find(function (x) { return String(x.ID) === String(id); });
       if (!p) return;
-      if (carrito[id]) {
-        carrito[id].cantidad++;
-      } else {
-        carrito[id] = { producto: p, cantidad: 1 };
-      }
+      if (carrito[id]) { carrito[id].cantidad++; } else { carrito[id] = { producto: p, cantidad: 1 }; }
       renderCarrito();
     }
-
     function cambiarCantidad(id, delta) {
       if (!carrito[id]) return;
       carrito[id].cantidad += delta;
       if (carrito[id].cantidad <= 0) delete carrito[id];
       renderCarrito();
     }
-
     function renderCarrito() {
-      const cont = document.getElementById('carrito-items');
-      const ids = Object.keys(carrito);
-
-      if (ids.length === 0) {
-        cont.innerHTML = '<p class="carrito-vacio">El carrito está vacío</p>';
-        document.getElementById('total').textContent = moneda(0);
-        document.getElementById('btn-pagar').disabled = true;
-        return;
-      }
-
-      let total = 0;
-      let html = '';
+      const cont = document.getElementById('carrito-items'), ids = Object.keys(carrito);
+      if (ids.length === 0) { cont.innerHTML = '<p class="carrito-vacio">El carrito está vacío</p>'; document.getElementById('total').textContent = moneda(0); document.getElementById('btn-pagar').disabled = true; return; }
+      let total = 0, html = '';
       ids.forEach(function (id) {
-        const item = carrito[id];
-        const subtotal = precioNum(item.producto.Precio) * item.cantidad;
-        total += subtotal;
-        html +=
-          '<div class="carrito-item">' +
-            '<div>' +
-              '<strong>' + esc(item.producto.Nombre) + '</strong><br>' +
-              '<small>' + moneda(precioNum(item.producto.Precio)) + ' c/u</small>' +
-            '</div>' +
-            '<div class="controles">' +
-              '<button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', -1)">−</button>' +
-              '<span>' + item.cantidad + '</span>' +
-              '<button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', 1)">+</button>' +
-            '</div>' +
-          '</div>';
+        const item = carrito[id], subtotal = precioNum(item.producto.Precio) * item.cantidad; total += subtotal;
+        html += '<div class="carrito-item"><div><strong>' + esc(item.producto.Nombre) + '</strong><br><small>' + moneda(precioNum(item.producto.Precio)) + ' c/u</small></div><div class="controles"><button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', -1)">−</button><span>' + item.cantidad + '</span><button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', 1)">+</button></div></div>';
       });
-
-      cont.innerHTML = html;
-      document.getElementById('total').textContent = moneda(total);
-      document.getElementById('btn-pagar').disabled = false;
+      cont.innerHTML = html; document.getElementById('total').textContent = moneda(total); document.getElementById('btn-pagar').disabled = false;
     }
 
-    // ============================================
-    // 3. PROCESAR PEDIDO
-    // ============================================
     function procesarPedido() {
-      const nombre = document.getElementById('nombre').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const telefono = document.getElementById('telefono').value.trim();
-      const direccion = document.getElementById('direccion').value.trim();
-
-      if (!nombre || !email) {
-        mostrarMensaje('Por favor, completa tu nombre y email.', 'error');
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        mostrarMensaje('El email no tiene un formato válido.', 'error');
-        return;
-      }
-
-      const items = Object.keys(carrito).map(function (id) {
-        return { id: id, cantidad: carrito[id].cantidad };
-      });
-
-      if (items.length === 0) {
-        mostrarMensaje('Tu carrito está vacío.', 'error');
-        return;
-      }
-
-      const btn = document.getElementById('btn-pagar');
-      btn.disabled = true;
-      btn.textContent = 'Procesando...';
-
-      const callbackName = nombreCb('callbackPedido');
-      const script = document.createElement('script');
-
-      function restaurarBoton() {
-        btn.disabled = Object.keys(carrito).length === 0;
-        btn.textContent = 'Pagar y Enviar Pedido';
-      }
-
-      function cleanup() {
-        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
-        if (script.parentNode) script.parentNode.removeChild(script);
-      }
-
+      const nombre = document.getElementById('nombre').value.trim(), email = document.getElementById('email').value.trim(), telefono = document.getElementById('telefono').value.trim(), direccion = document.getElementById('direccion').value.trim();
+      if (!nombre || !email) { mostrarMensaje('Por favor, completa tu nombre y email.', 'error'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarMensaje('El email no tiene un formato válido.', 'error'); return; }
+      const items = Object.keys(carrito).map(function (id) { return { id: id, cantidad: carrito[id].cantidad }; });
+      if (items.length === 0) { mostrarMensaje('Tu carrito está vacío.', 'error'); return; }
+      const btn = document.getElementById('btn-pagar'); btn.disabled = true; btn.textContent = 'Procesando...';
+      const callbackName = nombreCb('callbackPedido'), script = document.createElement('script');
+      function restaurarBoton() { btn.disabled = Object.keys(carrito).length === 0; btn.textContent = 'Pagar y Enviar Pedido'; }
+      function cleanup() { try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; } if (script.parentNode) script.parentNode.removeChild(script); }
       window[callbackName] = function (respuesta) {
         cleanup();
-
-        if (!respuesta || typeof respuesta !== 'object') {
-          restaurarBoton();
-          mostrarMensaje('Error: respuesta no válida del servidor.', 'error');
-          return;
-        }
-
-        // --- NUEVO: Detectar si es el aviso de pedido duplicado ---
+        if (!respuesta || typeof respuesta !== 'object') { restaurarBoton(); mostrarMensaje('Error: respuesta no válida del servidor.', 'error'); return; }
         if (!respuesta.success && respuesta.error && respuesta.error.indexOf('ya se ha registrado') !== -1) {
-          mostrarMensaje(respuesta.error, 'ok'); // Se muestra en verde
-          carrito = {};
-          renderCarrito();
-          restaurarBoton();
-          return;
+          mostrarMensaje(respuesta.error, 'ok'); carrito = {}; renderCarrito(); restaurarBoton(); return;
         }
-
-        if (respuesta.success && respuesta.paymentUrl) {
-          mostrarMensaje('¡Pedido registrado! Redirigiendo al pago...', 'ok');
-          window.location.href = respuesta.paymentUrl;
-          return;
-        }
-
-        if (respuesta.success) {
-          mostrarMensaje(respuesta.message || '¡Pedido registrado! Nos pondremos en contacto para el pago.', 'ok');
-          carrito = {};
-          renderCarrito();
-          restaurarBoton();
-          return;
-        }
-
-        restaurarBoton();
-        mostrarMensaje('Error: ' + (respuesta.error || 'No se pudo procesar el pedido.'), 'error');
+        if (respuesta.success && respuesta.paymentUrl) { mostrarMensaje('¡Pedido registrado! Redirigiendo al pago...', 'ok'); window.location.href = respuesta.paymentUrl; return; }
+        if (respuesta.success) { mostrarMensaje(respuesta.message || '¡Pedido registrado! Nos pondremos en contacto para el pago.', 'ok'); carrito = {}; renderCarrito(); restaurarBoton(); return; }
+        restaurarBoton(); mostrarMensaje('Error: ' + (respuesta.error || 'No se pudo procesar el pedido.'), 'error');
       };
-
-      script.onerror = function () {
-        cleanup();
-        restaurarBoton();
-        mostrarMensaje('Error de conexión. Inténtalo de nuevo.', 'error');
-      };
-
-      const params = new URLSearchParams({
-        action: 'processOrder',
-        callback: callbackName,
-        items: JSON.stringify(items),
-        nombre: nombre,
-        email: email,
-        telefono: telefono,
-        direccion: direccion,
-        skipStripe: stripeHabilitado ? 'false' : 'true'
-      });
-
-      script.src = APPS_SCRIPT_URL + '?' + params.toString();
-      document.body.appendChild(script);
+      script.onerror = function () { cleanup(); restaurarBoton(); mostrarMensaje('Error de conexión. Inténtalo de nuevo.', 'error'); };
+      const params = new URLSearchParams({ action: 'processOrder', callback: callbackName, items: JSON.stringify(items), nombre: nombre, email: email, telefono: telefono, direccion: direccion, skipStripe: stripeHabilitado ? 'false' : 'true' });
+      script.src = APPS_SCRIPT_URL + '?' + params.toString(); document.body.appendChild(script);
     }
 
-    function mostrarMensaje(texto, tipo) {
-      const msg = document.getElementById('mensaje');
-      msg.textContent = texto;
-      msg.className = 'mensaje ' + tipo;
-    }
+    function mostrarMensaje(texto, tipo) { const msg = document.getElementById('mensaje'); msg.textContent = texto; msg.className = 'mensaje ' + tipo; }
 
-    // ============================================
-    // INICIO
-    // ============================================
     function revisarResultadoPago() {
       const estado = new URLSearchParams(window.location.search).get('pago');
-      if (estado === 'exitoso') {
-        mostrarMensaje('¡Pago completado! Gracias por tu pedido. Te avisamos cuando esté listo.', 'ok');
-      } else if (estado === 'cancelado') {
-        mostrarMensaje('El pago se canceló y no se te ha cobrado. Puedes intentarlo de nuevo.', 'error');
-      }
+      if (estado === 'exitoso') { mostrarMensaje('¡Pago completado! Gracias por tu pedido. Te avisamos cuando esté listo.', 'ok'); }
+      else if (estado === 'cancelado') { mostrarMensaje('El pago se canceló y no se te ha cobrado. Puedes intentarlo de nuevo.', 'error'); }
     }
 
-    window.addEventListener('DOMContentLoaded', function () {
-      revisarResultadoPago();
-      cargarSlider();
-      cargarProductos();
-      cargarConfig();
-    });
+    window.addEventListener('DOMContentLoaded', function () { revisarResultadoPago(); cargarSlider(); cargarProductos(); cargarConfig(); });
   </script>
 </body>
 </html>
