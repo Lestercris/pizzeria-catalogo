@@ -6,165 +6,42 @@
   <title>🍕 Pizzería Hermanos Rivas</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: #fef8f2;
-      color: #333;
-      line-height: 1.6;
-    }
-    header {
-      background: linear-gradient(135deg, #c0392b, #e74c3c);
-      color: white;
-      padding: 25px 20px;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #fef8f2; color: #333; line-height: 1.6; }
+    header { background: linear-gradient(135deg, #c0392b, #e74c3c); color: white; padding: 25px 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     header h1 { font-size: 2rem; }
     header p { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 25px;
-    }
-    @media (max-width: 850px) {
-      .container { grid-template-columns: 1fr; }
-    }
-
-    /* Catálogo */
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+    @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
     .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
-    .producto {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-    }
-    .producto:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-    .producto img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      background: #eee;
-    }
+    .producto { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+    .producto:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+    .producto img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
     .producto-body { padding: 15px; flex: 1; display: flex; flex-direction: column; }
     .producto h3 { font-size: 1.15rem; color: #c0392b; margin-bottom: 6px; }
     .producto .desc { font-size: 0.85rem; color: #666; margin-bottom: 8px; flex: 1; }
     .producto .ingredientes { font-size: 0.78rem; color: #888; font-style: italic; margin-bottom: 10px; }
     .producto .precio { font-size: 1.25rem; font-weight: bold; color: #27ae60; margin-bottom: 10px; }
-    .producto button {
-      background: #c0392b;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
+    .producto button { background: #c0392b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: background 0.2s; }
     .producto button:hover { background: #a93226; }
     .producto button:disabled { background: #ccc; cursor: not-allowed; }
-
-    /* Carrito */
-    .carrito {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      height: fit-content;
-      position: sticky;
-      top: 20px;
-    }
+    .carrito { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); height: fit-content; position: sticky; top: 20px; }
     .carrito h2 { color: #c0392b; margin-bottom: 15px; font-size: 1.3rem; }
-    .carrito-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 0.9rem;
-    }
+    .carrito-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
     .carrito-item .controles { display: flex; align-items: center; gap: 6px; }
-    .carrito-item button {
-      background: #eee;
-      border: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-weight: bold;
-      color: #c0392b;
-    }
+    .carrito-item button { background: #eee; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold; color: #c0392b; }
     .carrito-item button:hover { background: #ddd; }
     .carrito-vacio { color: #999; font-style: italic; text-align: center; padding: 15px 0; }
-    .total {
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 2px solid #c0392b;
-      color: #c0392b;
-    }
-    .carrito input {
-      width: 100%;
-      padding: 9px;
-      margin-top: 8px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
-    .btn-pagar {
-      width: 100%;
-      background: #27ae60;
-      color: white;
-      border: none;
-      padding: 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      margin-top: 12px;
-      transition: background 0.2s;
-    }
+    .total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; margin-top: 15px; padding-top: 15px; border-top: 2px solid #c0392b; color: #c0392b; }
+    .carrito input { width: 100%; padding: 9px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
+    .btn-pagar { width: 100%; background: #27ae60; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 12px; transition: background 0.2s; }
     .btn-pagar:hover { background: #229954; }
     .btn-pagar:disabled { background: #aaa; cursor: not-allowed; }
-
-    .mensaje {
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-      font-size: 0.9rem;
-      display: none;
-    }
+    .mensaje { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem; display: none; }
     .mensaje.ok { background: #d4edda; color: #155724; display: block; }
     .mensaje.error { background: #f8d7da; color: #721c24; display: block; }
-
     .loader { text-align: center; padding: 40px; color: #999; }
-    .loader::after {
-      content: '';
-      display: inline-block;
-      width: 20px; height: 20px;
-      border: 3px solid #ddd;
-      border-top-color: #c0392b;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-left: 10px;
-      vertical-align: middle;
-    }
+    .loader::after { content: ''; display: inline-block; width: 20px; height: 20px; border: 3px solid #ddd; border-top-color: #c0392b; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 10px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Slider de portada */
     .hero { max-width: 1200px; margin: 22px auto 0; padding: 0 20px; }
     .hero[hidden] { display: none; }
     .hero-track { position: relative; width: 100%; height: 340px; border-radius: 16px; overflow: hidden; background: #eee; box-shadow: 0 10px 28px rgba(0,0,0,0.16); touch-action: pan-y; }
@@ -179,15 +56,12 @@
     .hero-dots { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
     .hero-dots button { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 50%; background: #d8d8d8; cursor: pointer; transition: background 0.2s, transform 0.2s; }
     .hero-dots button.on { background: #c0392b; transform: scale(1.25); }
-
     @media (max-width: 700px) {
       .hero { margin-top: 16px; padding: 0 12px; }
       .hero-track { height: 215px; border-radius: 12px; }
       .hero-btn { width: 34px; height: 34px; font-size: 21px; }
       .hero-cap { font-size: 1rem; padding: 34px 16px 14px; }
     }
-
-    /* Botón flotante WhatsApp */
     .wa-float { position: fixed; bottom: 20px; right: 20px; background: #25D366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
     .wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
   </style>
@@ -238,7 +112,7 @@
     </aside>
   </div>
 
-  <a href="https://wa.me/34601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
+  <a href="https://wa.me/346601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
      target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp" class="wa-float">
     <svg viewBox="0 0 24 24" width="35" height="35" fill="currentColor" aria-hidden="true">
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -246,7 +120,7 @@
   </a>
 
   <script>
-    // ⚙️ CONFIGURACIÓN - ASEGÚRATE DE QUE ESTA ES TU URL REAL
+    // ✅ TU NUEVA URL YA ESTÁ INTEGRADA AQUÍ
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycQiM-L1V5223KF9T1qbxVYH2cGfShl9jn7kUpm2289xPma38ejHuDoAAESsxyOTEDAg/exec';
 
     const MONEDA = '€';
