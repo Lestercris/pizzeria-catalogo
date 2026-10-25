@@ -20,6 +20,12 @@
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
     @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
 
+    /* Categorías */
+    .categorias { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .categorias button { background: white; border: 1px solid #ccc; color: #555; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+    .categorias button:hover { border-color: #c0392b; color: #c0392b; }
+    .categorias button.activa { background: #c0392b; border-color: #c0392b; color: white; }
+
     /* Catálogo */
     .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
     .producto { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
@@ -121,7 +127,9 @@
 
     <div class="container">
       <main>
-        <h2 style="color:#c0392b; margin-bottom:15px;">Nuestro Menú</h2>
+        <!-- FILTRO DE CATEGORÍAS -->
+        <div id="categorias-container" class="categorias"></div>
+
         <div id="catalogo" class="catalogo">
           <div class="loader">Cargando el menú...</div>
         </div>
@@ -193,15 +201,16 @@
   </a>
 
   <script>
-    // URL INTACTA
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRphH-U-yKwEOOK_p175FLVs0wGlhIqmMmqBooIFDavM28mIER2McjASg-mUokTpeGvA/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwh6A7GYJ7s6jXzjfJWj3i7eBpmjhF1nvIshZ6Q6nEIXc19EFz1IyeEgEOWCVKtc9ViFg/exec';
     const MONEDA = '€';
     const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160"><rect width="100%" height="100%" fill="#f1f1f1"/><text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text></svg>');
 
     let productos = [];
+    let productosFiltrados = [];
     let carrito = {};
     let stripeHabilitado = false;
     
+    let categoriaActual = 'Todas';
     let paginaActual = 1;
     const productosPorPagina = 6; 
 
@@ -244,7 +253,6 @@
     function cargarConfig() {
       jsonp('getConfig', function (data) {
         if (!data) return;
-        
         stripeHabilitado = !!(data.StripeHabilitado === true || String(data.StripeHabilitado).toLowerCase() === 'true');
 
         if (data.Promocion && data.Promocion.trim() !== '') {
@@ -259,26 +267,18 @@
           document.getElementById('footer-nombre').textContent = data.NombreNegocio;
           document.title = '🍕 ' + data.NombreNegocio;
         }
-
-        if (data.Direccion) {
-          document.getElementById('footer-direccion').innerHTML = data.Direccion;
-        }
-        
-        if (data.Horario) {
-          document.getElementById('footer-horario').innerHTML = data.Horario;
-        }
+        if (data.Direccion) document.getElementById('footer-direccion').innerHTML = data.Direccion;
+        if (data.Horario) document.getElementById('footer-horario').innerHTML = data.Horario;
         
         if (data.Telefono) {
           const telLink = document.getElementById('footer-telefono');
           telLink.innerHTML = data.Telefono;
           telLink.href = 'tel:' + data.Telefono.replace(/[^\d+]/g, '');
-
           const waBtn = document.getElementById('wa-float-btn');
           const numLimpio = data.Telefono.replace(/[^\d]/g, '');
           const msg = encodeURIComponent('Hola, quiero hacer un pedido en ' + (data.NombreNegocio || 'la pizzería'));
           waBtn.href = `https://wa.me/${numLimpio}?text=${msg}`;
         }
-
       }, function () {});
     }
 
@@ -311,11 +311,44 @@
       track.addEventListener('mouseenter', detenerAuto); track.addEventListener('mouseleave', iniciarAuto);
     }
 
+    // --- LÓGICA DE CATEGORÍAS Y PAGINACIÓN ---
     function mostrarProductos(lista) {
       if (!Array.isArray(lista)) { document.getElementById('catalogo').innerHTML = '<p style="color:#c0392b">El servidor devolvió una respuesta no válida.</p>'; return; }
+      
       productos = lista.filter(function (p) { return esVisible(p) && precioNum(p.Precio) > 0; });
       if (!productos.length) { document.getElementById('catalogo').innerHTML = '<p style="color:#999">No hay productos disponibles ahora mismo.</p>'; document.getElementById('paginacion').style.display = 'none'; return; }
+      
+      // Generar botones de categoría
+      const categorias = ['Todas'];
+      productos.forEach(p => {
+        const cat = p.Categoria ? p.Categoria.trim() : 'Otros';
+        if (!categorias.includes(cat)) categorias.push(cat);
+      });
+
+      const contCategorias = document.getElementById('categorias-container');
+      contCategorias.innerHTML = categorias.map(cat => 
+        `<button type="button" class="${cat === categoriaActual ? 'activa' : ''}" onclick="cambiarCategoria('${esc(cat)}')">${esc(cat)}</button>`
+      ).join('');
+
+      filtrarYRenderizar();
+    }
+
+    function cambiarCategoria(cat) {
+      categoriaActual = cat;
       paginaActual = 1;
+      // Actualizar estilos de botones
+      const botones = document.querySelectorAll('#categorias-container button');
+      botones.forEach(b => b.classList.remove('activa'));
+      event.target.classList.add('activa');
+      
+      filtrarYRenderizar();
+    }
+
+    function filtrarYRenderizar() {
+      productosFiltrados = categoriaActual === 'Todas' 
+        ? productos 
+        : productos.filter(p => (p.Categoria || 'Otros').trim() === categoriaActual);
+      
       renderizarPagina();
     }
 
@@ -323,8 +356,14 @@
       const cont = document.getElementById('catalogo');
       const inicio = (paginaActual - 1) * productosPorPagina;
       const fin = inicio + productosPorPagina;
-      const productosPagina = productos.slice(inicio, fin);
-      const totalPaginas = Math.ceil(productos.length / productosPorPagina);
+      const productosPagina = productosFiltrados.slice(inicio, fin);
+      const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
+
+      if (productosPagina.length === 0) {
+        cont.innerHTML = '<p style="color:#999">No hay productos en esta categoría.</p>';
+        document.getElementById('paginacion').style.display = 'none';
+        return;
+      }
 
       cont.innerHTML = productosPagina.map(function (p) {
         const urls = imagenesDe(p), placeholder = IMG_PLACEHOLDER;
@@ -352,7 +391,7 @@
     }
 
     function cambiarPagina(direccion) {
-      const totalPaginas = Math.ceil(productos.length / productosPorPagina);
+      const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
       const nuevaPagina = paginaActual + direccion;
       if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
         paginaActual = nuevaPagina;
@@ -361,6 +400,7 @@
       }
     }
 
+    // --- CARRITO Y PEDIDOS ---
     function agregarAlCarrito(id) {
       const p = productos.find(function (x) { return String(x.ID) === String(id); });
       if (!p) return;
