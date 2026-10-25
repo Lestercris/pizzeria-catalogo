@@ -154,9 +154,7 @@
 <input type="file" id="subida-archivo" accept="image/*" style="display: none;" onchange="procesarFotos(this)">
 
 <script>
-  // ⚠️ AQUÍ ESTÁ TU URL (Según la foto que me enviaste)
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycQiM-L1V5223KF9T1qbxVYH2cGfShl9jn7kUpm2289xPma38ejHuDoAAESsxyOTEDAg/exec';
-  
   const CLAVE_TOKEN = 'hr_adm_token';
   const TIMEOUT_JSONP = 30000;
 
@@ -320,6 +318,35 @@
     });
   }
 
+  // ⚠️ AQUÍ ESTÁ LA MAGIA: Ahora usamos fetch (POST) en lugar de JSONP para evitar que la URL se corte
+  async function subirFotoAlServidor(base64, mimeType) {
+    const id = uuidV4();
+    const formData = new URLSearchParams();
+    formData.append('action', 'uploadImageBase64');
+    formData.append('token', tokenAdmin);
+    formData.append('id', id);
+    formData.append('fileData', base64);
+    formData.append('mimeType', mimeType);
+
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) throw new Error('Error de red al subir la foto.');
+    
+    const text = await response.text();
+    let res;
+    try {
+      res = JSON.parse(text);
+    } catch(e) {
+      throw new Error('El servidor devolvió un formato inesperado.');
+    }
+
+    if (!res || !res.success || !res.url) throw new Error((res && res.error) || 'No se pudo subir la foto.');
+    return res.url;
+  }
+
   async function procesarFotos(input) {
     const archivos = Array.prototype.slice.call(input.files || []);
     input.value = '';
@@ -328,20 +355,34 @@
     const msgId = esSlider ? 'slider-msg' : 'panel-msg';
     const progId = esSlider ? 'slider-progress' : 'producto-progress';
     const limite = esSlider ? 10 : 8;
+    
     for (let i = 0; i < archivos.length; i++) {
       const cuantas = esSlider ? sliderItems.length : imagenesActuales.length;
       if (cuantas >= limite) { mostrarMsg(msgId, 'Máximo ' + limite + ' fotos.', 'error'); break; }
+      
       try {
         mostrarProgreso(progId, '⏳ Procesando y subiendo ' + (i + 1) + ' de ' + archivos.length + '...');
         mostrarMsg(msgId, '', 'ok');
+        
         const reducida = await comprimirImagen(archivos[i]);
         const base64 = await fileToBase64(reducida);
-        const id = uuidV4();
-        const res = await jsonpRequest({ action: 'uploadImageBase64', token: tokenAdmin, id: id, fileData: base64, mimeType: reducida.type || 'image/jpeg' });
-        if (!res || !res.success || !res.url) throw new Error((res && res.error) || 'No se pudo subir la foto.');
-        if (esSlider) { sliderItems.push({ ID: '', URL: res.url, Titulo: '', Activo: true }); renderizarSlider(); mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar slider" para publicarla.', 'ok'); }
-        else { imagenesActuales.push(res.url); renderizarGaleria(); mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar Cambios del Producto" para publicarla.', 'ok'); }
-      } catch (e) { mostrarMsg(msgId, e.message || 'No se pudo subir la foto.', 'error'); } finally { mostrarProgreso(progId, ''); }
+        
+        const url = await subirFotoAlServidor(base64, reducida.type || 'image/jpeg');
+        
+        if (esSlider) { 
+          sliderItems.push({ ID: '', URL: url, Titulo: '', Activo: true }); 
+          renderizarSlider(); 
+          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar slider" para publicarla.', 'ok'); 
+        } else { 
+          imagenesActuales.push(url); 
+          renderizarGaleria(); 
+          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar Cambios del Producto" para publicarla.', 'ok'); 
+        }
+      } catch (e) { 
+        mostrarMsg(msgId, e.message || 'No se pudo subir la foto.', 'error'); 
+      } finally { 
+        mostrarProgreso(progId, ''); 
+      }
     }
   }
 
