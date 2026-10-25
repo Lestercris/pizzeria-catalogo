@@ -6,12 +6,23 @@
   <title>🍕 Pizzería Hermanos Rivas</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #fef8f2; color: #333; line-height: 1.6; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #fef8f2; color: #333; line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
+    
+    /* Cabecera */
     header { background: linear-gradient(135deg, #c0392b, #e74c3c); color: white; padding: 25px 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     header h1 { font-size: 2rem; }
     header p { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
+
+    /* Promoción del día */
+    .promo-banner { background: #f1c40f; color: #7d6608; text-align: center; padding: 12px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); letter-spacing: 0.5px; }
+    .promo-banner span { background: #c0392b; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 8px; font-size: 0.9rem; }
+
+    /* Contenedor principal */
+    .main-content { flex: 1; }
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
     @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
+
+    /* Catálogo */
     .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
     .producto { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
     .producto:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
@@ -24,6 +35,15 @@
     .producto button { background: #c0392b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: background 0.2s; }
     .producto button:hover { background: #a93226; }
     .producto button:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* Paginación */
+    .paginacion { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 30px; margin-bottom: 20px; }
+    .paginacion button { background: white; border: 2px solid #c0392b; color: #c0392b; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+    .paginacion button:hover:not(:disabled) { background: #c0392b; color: white; }
+    .paginacion button:disabled { border-color: #ccc; color: #ccc; cursor: not-allowed; }
+    .paginacion span { font-weight: bold; color: #333; }
+
+    /* Carrito */
     .carrito { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); height: fit-content; position: sticky; top: 20px; }
     .carrito h2 { color: #c0392b; margin-bottom: 15px; font-size: 1.3rem; }
     .carrito-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
@@ -39,9 +59,12 @@
     .mensaje { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem; display: none; }
     .mensaje.ok { background: #d4edda; color: #155724; display: block; }
     .mensaje.error { background: #f8d7da; color: #721c24; display: block; }
+
     .loader { text-align: center; padding: 40px; color: #999; }
     .loader::after { content: ''; display: inline-block; width: 20px; height: 20px; border: 3px solid #ddd; border-top-color: #c0392b; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 10px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Slider de portada */
     .hero { max-width: 1200px; margin: 22px auto 0; padding: 0 20px; }
     .hero[hidden] { display: none; }
     .hero-track { position: relative; width: 100%; height: 340px; border-radius: 16px; overflow: hidden; background: #eee; box-shadow: 0 10px 28px rgba(0,0,0,0.16); touch-action: pan-y; }
@@ -62,6 +85,23 @@
       .hero-btn { width: 34px; height: 34px; font-size: 21px; }
       .hero-cap { font-size: 1rem; padding: 34px 16px 14px; }
     }
+
+    /* Footer (Pie de página) */
+    footer { background: #2c3e50; color: #ecf0f1; padding: 40px 20px 20px; margin-top: auto; }
+    .footer-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 30px; }
+    .footer-col h3 { color: #e74c3c; margin-bottom: 15px; font-size: 1.2rem; }
+    .footer-col p { font-size: 0.95rem; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 8px; }
+    .footer-col a { color: #f1c40f; text-decoration: none; }
+    .footer-col a:hover { text-decoration: underline; }
+    
+    /* Reseñas */
+    .resena { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #f1c40f; }
+    .estrellas { color: #f1c40f; font-size: 0.9rem; margin-bottom: 5px; }
+    .resena p { font-size: 0.85rem; font-style: italic; margin: 0; color: #bdc3c7; }
+    
+    .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #95a5a6; }
+
+    /* Botón flotante WhatsApp */
     .wa-float { position: fixed; bottom: 20px; right: 20px; background: #25D366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
     .wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
   </style>
@@ -73,46 +113,93 @@
     <p>Auténtica pizza, hecha con amor</p>
   </header>
 
-  <section class="hero" id="hero" hidden>
-    <div class="hero-track" id="heroTrack">
-      <div id="heroSlides"></div>
-      <button class="hero-btn prev" type="button" aria-label="Imagen anterior" onclick="moverSlider(-1)">‹</button>
-      <button class="hero-btn next" type="button" aria-label="Imagen siguiente" onclick="moverSlider(1)">›</button>
-    </div>
-    <div class="hero-dots" id="heroDots"></div>
-  </section>
-
-  <div class="container">
-    <main>
-      <h2 style="color:#c0392b; margin-bottom:15px;">Nuestro Menú</h2>
-      <div id="catalogo" class="catalogo">
-        <div class="loader">Cargando el menú...</div>
-      </div>
-    </main>
-
-    <aside>
-      <div class="carrito">
-        <h2>🛒 Tu Pedido</h2>
-        <div id="carrito-items">
-          <p class="carrito-vacio">El carrito está vacío</p>
-        </div>
-        <div class="total">
-          <span>Total:</span>
-          <span id="total">€0.00</span>
-        </div>
-        <input type="text" id="nombre" placeholder="Tu nombre" required>
-        <input type="email" id="email" placeholder="Tu email" required>
-        <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
-        <input type="text" id="direccion" placeholder="Dirección de entrega">
-        <button class="btn-pagar" id="btn-pagar" type="button" onclick="procesarPedido()" disabled>
-          Pagar y Enviar Pedido
-        </button>
-        <div id="mensaje" class="mensaje"></div>
-      </div>
-    </aside>
+  <!-- 🌟 PROMOCIÓN DEL DÍA (Puedes cambiar este texto cuando quieras) -->
+  <div class="promo-banner">
+    <span>¡HOY!</span> 2x1 en Pizzas Familiares al pedir por la web 🍕🔥
   </div>
 
-  <a href="https://wa.me/34601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
+  <div class="main-content">
+    <section class="hero" id="hero" hidden>
+      <div class="hero-track" id="heroTrack">
+        <div id="heroSlides"></div>
+        <button class="hero-btn prev" type="button" aria-label="Imagen anterior" onclick="moverSlider(-1)">‹</button>
+        <button class="hero-btn next" type="button" aria-label="Imagen siguiente" onclick="moverSlider(1)">›</button>
+      </div>
+      <div class="hero-dots" id="heroDots"></div>
+    </section>
+
+    <div class="container">
+      <main>
+        <h2 style="color:#c0392b; margin-bottom:15px;">Nuestro Menú</h2>
+        <div id="catalogo" class="catalogo">
+          <div class="loader">Cargando el menú...</div>
+        </div>
+        
+        <!-- Paginación -->
+        <div class="paginacion" id="paginacion" style="display: none;">
+          <button id="btn-prev" onclick="cambiarPagina(-1)">« Anterior</button>
+          <span id="info-pagina">Página 1</span>
+          <button id="btn-next" onclick="cambiarPagina(1)">Siguiente »</button>
+        </div>
+      </main>
+
+      <aside>
+        <div class="carrito">
+          <h2>🛒 Tu Pedido</h2>
+          <div id="carrito-items">
+            <p class="carrito-vacio">El carrito está vacío</p>
+          </div>
+          <div class="total">
+            <span>Total:</span>
+            <span id="total">€0.00</span>
+          </div>
+          <input type="text" id="nombre" placeholder="Tu nombre" required>
+          <input type="email" id="email" placeholder="Tu email" required>
+          <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
+          <input type="text" id="direccion" placeholder="Dirección de entrega">
+          <button class="btn-pagar" id="btn-pagar" type="button" onclick="procesarPedido()" disabled>
+            Pagar y Enviar Pedido
+          </button>
+          <div id="mensaje" class="mensaje"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Footer (Pie de página) -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3>📍 Dónde estamos</h3>
+        <p>Avenida Juan Carlos I, 20<br>30800 Lorca, Murcia</p>
+        <p>📞 <a href="tel:+346601860462">+34 660 18 60 46</a></p>
+        <p>✉️ <a href="mailto:info@hermanosrivas.com">info@hermanosrivas.com</a></p>
+      </div>
+      
+      <div class="footer-col">
+        <h3>🕒 Horario</h3>
+        <p>Lunes a Jueves:<br>13:00 - 16:00 y 20:00 - 23:30</p>
+        <p>Viernes, Sábados y Domingos:<br>13:00 - 16:30 y 20:00 - 00:30</p>
+      </div>
+
+      <div class="footer-col">
+        <h3>⭐ Opiniones de clientes</h3>
+        <div class="resena">
+          <div class="estrellas">★★★★★</div>
+          <p>"La mejor pizza de Lorca, sin duda. La masa es increíble." - Laura G.</p>
+        </div>
+        <div class="resena">
+          <div class="estrellas">★★★★★</div>
+          <p>"Pedimos por la web y llegó calentita en 25 minutos. ¡Muy recomendable!" - Carlos M.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2023 Pizzería Hermanos Rivas. Todos los derechos reservados.
+    </div>
+  </footer>
+
+  <a href="https://wa.me/346601860462?text=Hola,%20quiero%20hacer%20un%20pedido%20en%20Pizzer%C3%ADa%20Hermanos%20Rivas"
      target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp" class="wa-float">
     <svg viewBox="0 0 24 24" width="35" height="35" fill="currentColor" aria-hidden="true">
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -120,15 +207,18 @@
   </a>
 
   <script>
-    // ✅ TU NUEVA URL YA ESTÁ INTEGRADA AQUÍ
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycQiM-L1V5223KF9T1qbxVYH2cGfShl9jn7kUpm2289xPma38ejHuDoAAESsxyOTEDAg/exec';
-
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcyQJH-LIV5Z23KF9T1qbXVH2c6f5hJ9nj7kUjpm2289xPms30ej4HoDAE5sxyOTEDMg/exec';
     const MONEDA = '€';
     const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160"><rect width="100%" height="100%" fill="#f1f1f1"/><text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text></svg>');
 
+    // Variables globales
     let productos = [];
     let carrito = {};
     let stripeHabilitado = false;
+    
+    // Variables de paginación
+    let paginaActual = 1;
+    const productosPorPagina = 6; // Cambia este número si quieres más o menos pizzas por página
 
     function moneda(n) { return MONEDA + (Number(n) || 0).toFixed(2); }
     let contadorCb = 0;
@@ -196,12 +286,33 @@
       track.addEventListener('mouseenter', detenerAuto); track.addEventListener('mouseleave', iniciarAuto);
     }
 
+    // ==========================================
+    // LÓGICA DE PAGINACIÓN Y CATÁLOGO
+    // ==========================================
     function mostrarProductos(lista) {
-      const cont = document.getElementById('catalogo');
-      if (!Array.isArray(lista)) { cont.innerHTML = '<p style="color:#c0392b">El servidor devolvió una respuesta no válida.</p>'; return; }
+      if (!Array.isArray(lista)) { document.getElementById('catalogo').innerHTML = '<p style="color:#c0392b">El servidor devolvió una respuesta no válida.</p>'; return; }
+      
       productos = lista.filter(function (p) { return esVisible(p) && precioNum(p.Precio) > 0; });
-      if (!productos.length) { cont.innerHTML = '<p style="color:#999">No hay productos disponibles ahora mismo.</p>'; return; }
-      cont.innerHTML = productos.map(function (p) {
+      
+      if (!productos.length) { 
+        document.getElementById('catalogo').innerHTML = '<p style="color:#999">No hay productos disponibles ahora mismo.</p>'; 
+        document.getElementById('paginacion').style.display = 'none';
+        return; 
+      }
+
+      paginaActual = 1; // Reiniciar a la primera página al cargar
+      renderizarPagina();
+    }
+
+    function renderizarPagina() {
+      const cont = document.getElementById('catalogo');
+      const inicio = (paginaActual - 1) * productosPorPagina;
+      const fin = inicio + productosPorPagina;
+      const productosPagina = productos.slice(inicio, fin);
+      
+      const totalPaginas = Math.ceil(productos.length / productosPorPagina);
+
+      cont.innerHTML = productosPagina.map(function (p) {
         const urls = imagenesDe(p), placeholder = IMG_PLACEHOLDER;
         let imagenes;
         if (urls.length > 1) {
@@ -214,8 +325,33 @@
         }
         return '<article class="producto">' + imagenes + '<div class="producto-body"><h3>' + esc(p.Nombre) + '</h3><p class="desc">' + esc(p.Descripcion) + '</p><p class="ingredientes">' + esc(p.Ingredientes) + '</p><p class="precio">' + moneda(precioNum(p.Precio)) + '</p><button type="button" onclick="agregarAlCarrito(\'' + esc(p.ID) + '\')">Añadir al carrito</button></div></article>';
       }).join('');
+
+      // Actualizar controles de paginación
+      const paginacionDiv = document.getElementById('paginacion');
+      if (totalPaginas > 1) {
+        paginacionDiv.style.display = 'flex';
+        document.getElementById('info-pagina').textContent = 'Página ' + paginaActual + ' de ' + totalPaginas;
+        document.getElementById('btn-prev').disabled = (paginaActual === 1);
+        document.getElementById('btn-next').disabled = (paginaActual === totalPaginas);
+      } else {
+        paginacionDiv.style.display = 'none';
+      }
     }
 
+    function cambiarPagina(direccion) {
+      const totalPaginas = Math.ceil(productos.length / productosPorPagina);
+      const nuevaPagina = paginaActual + direccion;
+      if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+        paginaActual = nuevaPagina;
+        renderizarPagina();
+        // Hacer scroll hacia arriba del catálogo suavemente
+        document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // ==========================================
+    // CARRITO Y PEDIDOS
+    // ==========================================
     function agregarAlCarrito(id) {
       const p = productos.find(function (x) { return String(x.ID) === String(id); });
       if (!p) return;
@@ -245,10 +381,12 @@
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarMensaje('El email no tiene un formato válido.', 'error'); return; }
       const items = Object.keys(carrito).map(function (id) { return { id: id, cantidad: carrito[id].cantidad }; });
       if (items.length === 0) { mostrarMensaje('Tu carrito está vacío.', 'error'); return; }
+      
       const btn = document.getElementById('btn-pagar'); btn.disabled = true; btn.textContent = 'Procesando...';
       const callbackName = nombreCb('callbackPedido'), script = document.createElement('script');
       function restaurarBoton() { btn.disabled = Object.keys(carrito).length === 0; btn.textContent = 'Pagar y Enviar Pedido'; }
       function cleanup() { try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; } if (script.parentNode) script.parentNode.removeChild(script); }
+      
       window[callbackName] = function (respuesta) {
         cleanup();
         if (!respuesta || typeof respuesta !== 'object') { restaurarBoton(); mostrarMensaje('Error: respuesta no válida del servidor.', 'error'); return; }
