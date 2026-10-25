@@ -154,15 +154,12 @@
 <input type="file" id="subida-archivo" accept="image/*" style="display: none;" onchange="procesarFotos(this)">
 
 <script>
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_qnPKTzKR56CKC_GzySsMI0ASli_O54PdieFJYwG4AoyAXANOdKHbMzPaQptf-efmyA/exec';
+  // ⚙️ CONFIGURACIÓN - ASEGÚRATE DE QUE ESTA ES TU URL REAL
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyo5Tv2if3uFBzYG1wyuOsEe-dZ9nblnHoQW6fUcuecx9nQ5dw0DNAtOiWFdB46BGCU-A/exec';
   const CLAVE_TOKEN = 'hr_adm_token';
-  const TIMEOUT_JSONP = 30000; // Aumentado por si la foto tarda en subir
+  const TIMEOUT_JSONP = 30000;
 
-  let productosGlobal = [];
-  let tokenAdmin = '';
-  let imagenesActuales = [];
-  let sliderItems = [];
-  let destinoSubida = 'slider';
+  let productosGlobal = [], tokenAdmin = '', imagenesActuales = [], sliderItems = [], destinoSubida = 'slider';
 
   function mostrarMsg(id, texto, tipo) { const el = document.getElementById(id); if (!el) return; el.textContent = texto; el.className = 'msg ' + tipo; }
   function ocultarMsg(id) { const el = document.getElementById(id); if (!el) return; el.textContent = ''; el.className = 'msg'; }
@@ -295,20 +292,16 @@
   function pedirFoto(destino) { destinoSubida = destino; const input = document.getElementById('subida-archivo'); input.value = ''; input.click(); }
 
   async function comprimirImagen(archivo, maxLado, calidad) {
-    maxLado = maxLado || 1200; // Reducido un poco para que pese menos en Base64
-    calidad = calidad || 0.8;
+    maxLado = maxLado || 1200; calidad = calidad || 0.8;
     if (!/^image\//.test(archivo.type || '')) throw new Error('Ese archivo no es una imagen.');
     if (archivo.type === 'image/gif') return archivo;
-
     const url = URL.createObjectURL(archivo);
     try {
       const img = new Image();
       await new Promise(function (res, rej) { img.onload = res; img.onerror = rej; img.src = url; });
       const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
-      const ancho = Math.max(1, Math.round(img.width * escala));
-      const alto = Math.max(1, Math.round(img.height * escala));
-      const lienzo = document.createElement('canvas');
-      lienzo.width = ancho; lienzo.height = alto;
+      const ancho = Math.max(1, Math.round(img.width * escala)), alto = Math.max(1, Math.round(img.height * escala));
+      const lienzo = document.createElement('canvas'); lienzo.width = ancho; lienzo.height = alto;
       lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
       const reducida = await new Promise(function (res) { lienzo.toBlob(res, 'image/jpeg', calidad); });
       if (!reducida) return archivo;
@@ -320,11 +313,7 @@
   function fileToBase64(archivo) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result;
-        const base64 = result.split(',')[1]; // Quitar el prefijo data:image/jpeg;base64,
-        resolve(base64);
-      };
+      reader.onload = () => resolve(reader.result.split(',')[1]);
       reader.onerror = error => reject(error);
       reader.readAsDataURL(archivo);
     });
@@ -334,51 +323,24 @@
     const archivos = Array.prototype.slice.call(input.files || []);
     input.value = '';
     if (!archivos.length) return;
-
     const esSlider = destinoSubida === 'slider';
     const msgId = esSlider ? 'slider-msg' : 'panel-msg';
     const progId = esSlider ? 'slider-progress' : 'producto-progress';
     const limite = esSlider ? 10 : 8;
-
     for (let i = 0; i < archivos.length; i++) {
       const cuantas = esSlider ? sliderItems.length : imagenesActuales.length;
       if (cuantas >= limite) { mostrarMsg(msgId, 'Máximo ' + limite + ' fotos.', 'error'); break; }
-
       try {
         mostrarProgreso(progId, '⏳ Procesando y subiendo ' + (i + 1) + ' de ' + archivos.length + '...');
         mostrarMsg(msgId, '', 'ok');
-
         const reducida = await comprimirImagen(archivos[i]);
         const base64 = await fileToBase64(reducida);
         const id = uuidV4();
-
-        // Enviar a Apps Script por Base64
-        const res = await jsonpRequest({
-          action: 'uploadImageBase64',
-          token: tokenAdmin,
-          id: id,
-          fileData: base64,
-          mimeType: reducida.type || 'image/jpeg'
-        });
-
-        if (!res || !res.success || !res.url) {
-          throw new Error((res && res.error) || 'No se pudo subir la foto.');
-        }
-
-        if (esSlider) {
-          sliderItems.push({ ID: '', URL: res.url, Titulo: '', Activo: true });
-          renderizarSlider();
-          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar slider" para publicarla.', 'ok');
-        } else {
-          imagenesActuales.push(res.url);
-          renderizarGaleria();
-          mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar Cambios del Producto" para publicarla.', 'ok');
-        }
-      } catch (e) {
-        mostrarMsg(msgId, e.message || 'No se pudo subir la foto.', 'error');
-      } finally {
-        mostrarProgreso(progId, '');
-      }
+        const res = await jsonpRequest({ action: 'uploadImageBase64', token: tokenAdmin, id: id, fileData: base64, mimeType: reducida.type || 'image/jpeg' });
+        if (!res || !res.success || !res.url) throw new Error((res && res.error) || 'No se pudo subir la foto.');
+        if (esSlider) { sliderItems.push({ ID: '', URL: res.url, Titulo: '', Activo: true }); renderizarSlider(); mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar slider" para publicarla.', 'ok'); }
+        else { imagenesActuales.push(res.url); renderizarGaleria(); mostrarMsg(msgId, '✅ Foto subida. Pulsa "Guardar Cambios del Producto" para publicarla.', 'ok'); }
+      } catch (e) { mostrarMsg(msgId, e.message || 'No se pudo subir la foto.', 'error'); } finally { mostrarProgreso(progId, ''); }
     }
   }
 
@@ -387,12 +349,7 @@
     if (!id) { document.getElementById('p-id').value = ''; document.getElementById('p-nombre').value = ''; document.getElementById('p-precio').value = ''; document.getElementById('p-desc').value = ''; document.getElementById('p-ingredientes').value = ''; document.getElementById('p-categoria').value = 'Pizzas'; document.getElementById('p-disponible').value = 'si'; imagenesActuales = []; renderizarGaleria(); return; }
     const p = productosGlobal.find(function (x) { return String(x.ID) === String(id); });
     if (!p) return;
-    document.getElementById('p-id').value = p.ID || '';
-    document.getElementById('p-nombre').value = p.Nombre || '';
-    document.getElementById('p-categoria').value = p.Categoria || '';
-    document.getElementById('p-precio').value = p.Precio != null ? p.Precio : '';
-    document.getElementById('p-desc').value = p.Descripcion || '';
-    document.getElementById('p-ingredientes').value = p.Ingredientes || '';
+    document.getElementById('p-id').value = p.ID || ''; document.getElementById('p-nombre').value = p.Nombre || ''; document.getElementById('p-categoria').value = p.Categoria || ''; document.getElementById('p-precio').value = p.Precio != null ? p.Precio : ''; document.getElementById('p-desc').value = p.Descripcion || ''; document.getElementById('p-ingredientes').value = p.Ingredientes || '';
     const disp = String(p.Disponible).trim().toLowerCase();
     document.getElementById('p-disponible').value = (disp === 'si' || disp === 'true' || p.Disponible === true) ? 'si' : 'no';
     const raw = p.ImagenURL || p.Imagen || '';
@@ -413,8 +370,7 @@
   }
 
   function agregarImagen() {
-    const input = document.getElementById('nueva-imagen-url');
-    const url = input.value.trim();
+    const input = document.getElementById('nueva-imagen-url'); const url = input.value.trim();
     if (!url) return;
     if (!/^https?:\/\/\S+$/i.test(url)) { alert('La imagen debe ser una URL que empiece por http:// o https://'); return; }
     if (imagenesActuales.length >= 8) { alert('Máximo 8 imágenes por producto.'); return; }
@@ -426,16 +382,7 @@
   async function guardarProducto() {
     const btn = document.getElementById('btn-guardar'); const original = btn.textContent;
     const precio = precioNum(document.getElementById('p-precio').value);
-    const prod = {
-      ID: document.getElementById('p-id').value.trim().toUpperCase(),
-      Nombre: document.getElementById('p-nombre').value.trim(),
-      Categoria: document.getElementById('p-categoria').value.trim(),
-      Precio: precio,
-      Descripcion: document.getElementById('p-desc').value.trim(),
-      Ingredientes: document.getElementById('p-ingredientes').value.trim(),
-      ImagenURL: imagenesActuales.join(','),
-      Disponible: document.getElementById('p-disponible').value
-    };
+    const prod = { ID: document.getElementById('p-id').value.trim().toUpperCase(), Nombre: document.getElementById('p-nombre').value.trim(), Categoria: document.getElementById('p-categoria').value.trim(), Precio: precio, Descripcion: document.getElementById('p-desc').value.trim(), Ingredientes: document.getElementById('p-ingredientes').value.trim(), ImagenURL: imagenesActuales.join(','), Disponible: document.getElementById('p-disponible').value };
     if (!prod.ID) { mostrarMsg('panel-msg', 'El ID es obligatorio.', 'error'); return; }
     if (!/^[A-Za-z0-9_-]{1,20}$/.test(prod.ID)) { mostrarMsg('panel-msg', 'El ID solo admite letras, números, guion y guion bajo.', 'error'); return; }
     if (!prod.Nombre) { mostrarMsg('panel-msg', 'El nombre es obligatorio.', 'error'); return; }
