@@ -91,14 +91,16 @@
 
     /* Footer (Pie de página) */
     footer { background: #2c3e50; color: #ecf0f1; padding: 40px 20px 20px; margin-top: auto; }
-    .footer-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 30px; }
+    .footer-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 30px; }
     .footer-col h3 { color: #e74c3c; margin-bottom: 15px; font-size: 1.2rem; }
     .footer-col p { font-size: 0.95rem; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 8px; }
     .footer-col a { color: #f1c40f; text-decoration: none; }
     .footer-col a:hover { text-decoration: underline; }
+    
     .resena { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #f1c40f; }
-    .estrellas { color: #f1c40f; font-size: 0.9rem; margin-bottom: 5px; }
+    .estrellas { color: #f1c40f; font-size: 1rem; margin-bottom: 5px; }
     .resena p { font-size: 0.85rem; font-style: italic; margin: 0; color: #bdc3c7; }
+    
     .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #95a5a6; }
 
     /* Botón flotante WhatsApp */
@@ -127,13 +129,10 @@
 
     <div class="container">
       <main>
-        <!-- FILTRO DE CATEGORÍAS -->
         <div id="categorias-container" class="categorias"></div>
-
         <div id="catalogo" class="catalogo">
           <div class="loader">Cargando el menú...</div>
         </div>
-        
         <div class="paginacion" id="paginacion" style="display: none;">
           <button id="btn-prev" onclick="cambiarPagina(-1)">« Anterior</button>
           <span id="info-pagina">Página 1</span>
@@ -179,13 +178,23 @@
 
       <div class="footer-col">
         <h3>⭐ Opiniones de clientes</h3>
-        <div class="resena">
-          <div class="estrellas">★★★★★</div>
-          <p>"La mejor pizza de Lorca, sin duda. La masa es increíble." - Laura G.</p>
+        <div id="lista-resenas" style="margin-bottom: 15px; max-height: 250px; overflow-y: auto;">
+          <p style="color: #bdc3c7; font-size: 0.9rem;">Cargando reseñas...</p>
         </div>
-        <div class="resena">
-          <div class="estrellas">★★★★★</div>
-          <p>"Pedimos por la web y llegó calentita en 25 minutos. ¡Muy recomendable!" - Carlos M.</p>
+        
+        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+          <p style="font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; color: #fff;">Déjanos tu opinión</p>
+          <input type="text" id="res-nombre" placeholder="Tu nombre" style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 5px; border: none; font-family: inherit;">
+          <select id="res-estrellas" style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 5px; border: none; font-family: inherit;">
+            <option value="5">★★★★★ (Excelente)</option>
+            <option value="4">★★★★☆ (Muy bueno)</option>
+            <option value="3">★★★☆☆ (Normal)</option>
+            <option value="2">★★☆☆☆ (Malo)</option>
+            <option value="1">★☆☆☆☆ (Muy malo)</option>
+          </select>
+          <textarea id="res-comentario" placeholder="¿Qué te pareció la pizza?" style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 5px; border: none; resize: vertical; font-family: inherit;" rows="2"></textarea>
+          <button type="button" onclick="enviarResena()" style="background: #c0392b; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">Enviar Reseña</button>
+          <div id="res-msg" style="font-size: 0.8rem; margin-top: 8px; display: none; text-align: center;"></div>
         </div>
       </div>
     </div>
@@ -201,30 +210,28 @@
   </a>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwh6A7GYJ7s6jXzjfJWj3i7eBpmjhF1nvIshZ6Q6nEIXc19EFz1IyeEgEOWCVKtc9ViFg/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydeHZ6LbFZliq-Gz1u0Vn2E-fScXY0xJ1DxysH6OhQh6VtyWUOIvpONgy73u1Q0Ffi2g/exec';
     const MONEDA = '€';
     const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160"><rect width="100%" height="100%" fill="#f1f1f1"/><text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text></svg>');
 
-    let productos = [];
-    let productosFiltrados = [];
-    let carrito = {};
-    let stripeHabilitado = false;
-    
-    let categoriaActual = 'Todas';
-    let paginaActual = 1;
+    let productos = [], productosFiltrados = [], carrito = {}, stripeHabilitado = false;
+    let telefonoNegocio = '+34601860462';
+    let categoriaActual = 'Todas', paginaActual = 1;
     const productosPorPagina = 6; 
 
     function moneda(n) { return MONEDA + (Number(n) || 0).toFixed(2); }
     let contadorCb = 0;
     function nombreCb(prefijo) { contadorCb += 1; return prefijo + '_' + Date.now() + '_' + contadorCb; }
 
-    function jsonp(action, onData, onError) {
+    function jsonp(action, onData, onError, extraParams) {
       const cb = nombreCb('cb_' + action);
       const script = document.createElement('script');
       function cleanup() { try { delete window[cb]; } catch (e) { window[cb] = undefined; } if (script.parentNode) script.parentNode.removeChild(script); }
       window[cb] = function (data) { cleanup(); if (typeof onData === 'function') onData(data); };
       script.onerror = function () { cleanup(); if (typeof onError === 'function') onError(); };
-      script.src = APPS_SCRIPT_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cb;
+      
+      const query = new URLSearchParams(Object.assign({ action: action, callback: cb }, extraParams || {})).toString();
+      script.src = APPS_SCRIPT_URL + '?' + query;
       document.body.appendChild(script);
     }
 
@@ -271,15 +278,78 @@
         if (data.Horario) document.getElementById('footer-horario').innerHTML = data.Horario;
         
         if (data.Telefono) {
+          telefonoNegocio = data.Telefono;
           const telLink = document.getElementById('footer-telefono');
           telLink.innerHTML = data.Telefono;
           telLink.href = 'tel:' + data.Telefono.replace(/[^\d+]/g, '');
           const waBtn = document.getElementById('wa-float-btn');
-          const numLimpio = data.Telefono.replace(/[^\d]/g, '');
+          const numLimpio = data.Telefono.replace(/\D/g, ''); 
           const msg = encodeURIComponent('Hola, quiero hacer un pedido en ' + (data.NombreNegocio || 'la pizzería'));
           waBtn.href = `https://wa.me/${numLimpio}?text=${msg}`;
         }
       }, function () {});
+    }
+
+    function cargarResenasPublicas() {
+      jsonp('getReviews', function(data) {
+        const cont = document.getElementById('lista-resenas');
+        if (!cont) return;
+        if (!data || !data.length) {
+          cont.innerHTML = '<p style="color: #bdc3c7; font-size: 0.9rem;">Aún no hay reseñas. ¡Sé el primero!</p>';
+          return;
+        }
+        
+        cont.innerHTML = data.map(r => {
+          const estrellas = '★'.repeat(r.Estrellas) + '☆'.repeat(5 - r.Estrellas);
+          return `
+            <div class="resena">
+              <div class="estrellas">${estrellas}</div>
+              <p>"${esc(r.Comentario)}"</p>
+              <small style="color: #95a5a6; font-size: 0.75rem;">- ${esc(r.Nombre)} (${r.Fecha})</small>
+            </div>
+          `;
+        }).join('');
+      }, function() {});
+    }
+
+    function enviarResena() {
+      const nombre = document.getElementById('res-nombre').value.trim();
+      const estrellas = document.getElementById('res-estrellas').value;
+      const comentario = document.getElementById('res-comentario').value.trim();
+      const msgDiv = document.getElementById('res-msg');
+      const btn = event.target;
+
+      if (!nombre || !comentario) {
+        msgDiv.textContent = 'Por favor, rellena tu nombre y comentario.';
+        msgDiv.style.color = '#ff6b6b';
+        msgDiv.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      jsonp('saveReview', function(res) {
+        btn.disabled = false;
+        btn.textContent = 'Enviar Reseña';
+        if (res && res.success) {
+          msgDiv.textContent = '✅ ¡Gracias! Tu reseña será revisada y publicada pronto.';
+          msgDiv.style.color = '#2ecc71';
+          msgDiv.style.display = 'block';
+          document.getElementById('res-nombre').value = '';
+          document.getElementById('res-comentario').value = '';
+        } else {
+          msgDiv.textContent = 'Error: ' + (res.error || 'No se pudo enviar.');
+          msgDiv.style.color = '#ff6b6b';
+          msgDiv.style.display = 'block';
+        }
+      }, function() {
+        btn.disabled = false;
+        btn.textContent = 'Enviar Reseña';
+        msgDiv.textContent = 'Error de conexión.';
+        msgDiv.style.color = '#ff6b6b';
+        msgDiv.style.display = 'block';
+      }, { nombre: nombre, estrellas: estrellas, comentario: comentario });
     }
 
     let slides = [], slideActual = 0, slideTimer = null;
@@ -311,14 +381,11 @@
       track.addEventListener('mouseenter', detenerAuto); track.addEventListener('mouseleave', iniciarAuto);
     }
 
-    // --- LÓGICA DE CATEGORÍAS Y PAGINACIÓN ---
     function mostrarProductos(lista) {
       if (!Array.isArray(lista)) { document.getElementById('catalogo').innerHTML = '<p style="color:#c0392b">El servidor devolvió una respuesta no válida.</p>'; return; }
-      
       productos = lista.filter(function (p) { return esVisible(p) && precioNum(p.Precio) > 0; });
       if (!productos.length) { document.getElementById('catalogo').innerHTML = '<p style="color:#999">No hay productos disponibles ahora mismo.</p>'; document.getElementById('paginacion').style.display = 'none'; return; }
       
-      // Generar botones de categoría
       const categorias = ['Todas'];
       productos.forEach(p => {
         const cat = p.Categoria ? p.Categoria.trim() : 'Otros';
@@ -327,20 +394,17 @@
 
       const contCategorias = document.getElementById('categorias-container');
       contCategorias.innerHTML = categorias.map(cat => 
-        `<button type="button" class="${cat === categoriaActual ? 'activa' : ''}" onclick="cambiarCategoria('${esc(cat)}')">${esc(cat)}</button>`
+        `<button type="button" class="${cat === categoriaActual ? 'activa' : ''}" onclick="cambiarCategoria('${esc(cat)}', this)">${esc(cat)}</button>`
       ).join('');
 
       filtrarYRenderizar();
     }
 
-    function cambiarCategoria(cat) {
+    function cambiarCategoria(cat, btn) {
       categoriaActual = cat;
       paginaActual = 1;
-      // Actualizar estilos de botones
-      const botones = document.querySelectorAll('#categorias-container button');
-      botones.forEach(b => b.classList.remove('activa'));
-      event.target.classList.add('activa');
-      
+      document.querySelectorAll('#categorias-container button').forEach(b => b.classList.remove('activa'));
+      btn.classList.add('activa');
       filtrarYRenderizar();
     }
 
@@ -348,7 +412,6 @@
       productosFiltrados = categoriaActual === 'Todas' 
         ? productos 
         : productos.filter(p => (p.Categoria || 'Otros').trim() === categoriaActual);
-      
       renderizarPagina();
     }
 
@@ -400,55 +463,140 @@
       }
     }
 
-    // --- CARRITO Y PEDIDOS ---
     function agregarAlCarrito(id) {
       const p = productos.find(function (x) { return String(x.ID) === String(id); });
       if (!p) return;
       if (carrito[id]) { carrito[id].cantidad++; } else { carrito[id] = { producto: p, cantidad: 1 }; }
       renderCarrito();
     }
+    
     function cambiarCantidad(id, delta) {
       if (!carrito[id]) return;
       carrito[id].cantidad += delta;
       if (carrito[id].cantidad <= 0) delete carrito[id];
       renderCarrito();
     }
+    
     function renderCarrito() {
       const cont = document.getElementById('carrito-items'), ids = Object.keys(carrito);
-      if (ids.length === 0) { cont.innerHTML = '<p class="carrito-vacio">El carrito está vacío</p>'; document.getElementById('total').textContent = moneda(0); document.getElementById('btn-pagar').disabled = true; return; }
+      if (ids.length === 0) { 
+        cont.innerHTML = '<p class="carrito-vacio">El carrito está vacío</p>'; 
+        document.getElementById('total').textContent = moneda(0); 
+        document.getElementById('btn-pagar').disabled = true; 
+        return; 
+      }
       let total = 0, html = '';
       ids.forEach(function (id) {
-        const item = carrito[id], subtotal = precioNum(item.producto.Precio) * item.cantidad; total += subtotal;
+        const item = carrito[id], subtotal = precioNum(item.producto.Precio) * item.cantidad; 
+        total += subtotal;
         html += '<div class="carrito-item"><div><strong>' + esc(item.producto.Nombre) + '</strong><br><small>' + moneda(precioNum(item.producto.Precio)) + ' c/u</small></div><div class="controles"><button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', -1)">−</button><span>' + item.cantidad + '</span><button type="button" onclick="cambiarCantidad(\'' + esc(id) + '\', 1)">+</button></div></div>';
       });
-      cont.innerHTML = html; document.getElementById('total').textContent = moneda(total); document.getElementById('btn-pagar').disabled = false;
+      cont.innerHTML = html; 
+      document.getElementById('total').textContent = moneda(total); 
+      document.getElementById('btn-pagar').disabled = false;
     }
 
     function procesarPedido() {
-      const nombre = document.getElementById('nombre').value.trim(), email = document.getElementById('email').value.trim(), telefono = document.getElementById('telefono').value.trim(), direccion = document.getElementById('direccion').value.trim();
+      const nombre = document.getElementById('nombre').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+
       if (!nombre || !email) { mostrarMensaje('Por favor, completa tu nombre y email.', 'error'); return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarMensaje('El email no tiene un formato válido.', 'error'); return; }
+      
       const items = Object.keys(carrito).map(function (id) { return { id: id, cantidad: carrito[id].cantidad }; });
       if (items.length === 0) { mostrarMensaje('Tu carrito está vacío.', 'error'); return; }
       
-      const btn = document.getElementById('btn-pagar'); btn.disabled = true; btn.textContent = 'Procesando...';
+      const btn = document.getElementById('btn-pagar'); 
+      btn.disabled = true; 
+      btn.textContent = 'Procesando...';
+      
       const callbackName = nombreCb('callbackPedido'), script = document.createElement('script');
-      function restaurarBoton() { btn.disabled = Object.keys(carrito).length === 0; btn.textContent = 'Pagar y Enviar Pedido'; }
-      function cleanup() { try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; } if (script.parentNode) script.parentNode.removeChild(script); }
+      
+      function restaurarBoton() { 
+        btn.disabled = Object.keys(carrito).length === 0; 
+        btn.textContent = 'Pagar y Enviar Pedido'; 
+      }
+      
+      function cleanup() { 
+        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; } 
+        if (script.parentNode) script.parentNode.removeChild(script); 
+      }
       
       window[callbackName] = function (respuesta) {
         cleanup();
-        if (!respuesta || typeof respuesta !== 'object') { restaurarBoton(); mostrarMensaje('Error: respuesta no válida del servidor.', 'error'); return; }
-        if (!respuesta.success && respuesta.error && respuesta.error.indexOf('ya se ha registrado') !== -1) {
-          mostrarMensaje(respuesta.error, 'ok'); carrito = {}; renderCarrito(); restaurarBoton(); return;
+        if (!respuesta || typeof respuesta !== 'object') { 
+          restaurarBoton(); 
+          mostrarMensaje('Error: respuesta no válida del servidor.', 'error'); 
+          return; 
         }
-        if (respuesta.success && respuesta.paymentUrl) { mostrarMensaje('¡Pedido registrado! Redirigiendo al pago...', 'ok'); window.location.href = respuesta.paymentUrl; return; }
-        if (respuesta.success) { mostrarMensaje(respuesta.message || '¡Pedido registrado! Nos pondremos en contacto para el pago.', 'ok'); carrito = {}; renderCarrito(); restaurarBoton(); return; }
-        restaurarBoton(); mostrarMensaje('Error: ' + (respuesta.error || 'No se pudo procesar el pedido.'), 'error');
+        
+        if (respuesta.success) {
+          if (respuesta.paymentUrl) { 
+            mostrarMensaje('¡Pedido registrado! Redirigiendo al pago con tarjeta...', 'ok'); 
+            window.location.href = respuesta.paymentUrl; 
+            return; 
+          }
+
+          if (!respuesta.paymentUrl) {
+            let resumenWsp = '';
+            Object.keys(carrito).forEach(id => {
+              const item = carrito[id];
+              resumenWsp += `- ${item.cantidad}x ${item.producto.Nombre}\n`;
+            });
+            
+            const totalPedido = document.getElementById('total').textContent;
+            const msg = encodeURIComponent(
+              `Hola, acabo de hacer el pedido *#${respuesta.orderId}* en la web.\n\n` +
+              `*Mi pedido:*\n${resumenWsp}\n` +
+              `*Total:* ${totalPedido}\n\n` +
+              `*Nombre:* ${nombre}\n` +
+              `*Dirección:* ${direccion || 'Recogida en tienda'}\n\n` +
+              `Os escribo para coordinar el pago.`
+            );
+
+            const numLimpio = telefonoNegocio.replace(/\D/g, ''); 
+            const urlWhatsApp = `https://wa.me/${numLimpio}?text=${msg}`;
+
+            mostrarMensaje('¡Pedido registrado! Abriendo WhatsApp para enviar los detalles...', 'ok');
+            
+            carrito = {}; 
+            renderCarrito(); 
+            restaurarBoton(); 
+
+            setTimeout(() => { window.open(urlWhatsApp, '_blank'); }, 1000);
+            return;
+          }
+        }
+
+        if (!respuesta.success && respuesta.error && respuesta.error.indexOf('ya se ha registrado') !== -1) {
+          mostrarMensaje(respuesta.error, 'ok'); 
+          carrito = {}; 
+          renderCarrito(); 
+          restaurarBoton(); 
+          return;
+        }
+
+        restaurarBoton(); 
+        mostrarMensaje('Error: ' + (respuesta.error || 'No se pudo procesar el pedido.'), 'error');
       };
+      
       script.onerror = function () { cleanup(); restaurarBoton(); mostrarMensaje('Error de conexión. Inténtalo de nuevo.', 'error'); };
-      const params = new URLSearchParams({ action: 'processOrder', callback: callbackName, items: JSON.stringify(items), nombre: nombre, email: email, telefono: telefono, direccion: direccion, skipStripe: stripeHabilitado ? 'false' : 'true' });
-      script.src = APPS_SCRIPT_URL + '?' + params.toString(); document.body.appendChild(script);
+      
+      const params = new URLSearchParams({ 
+        action: 'processOrder', 
+        callback: callbackName, 
+        items: JSON.stringify(items), 
+        nombre: nombre, 
+        email: email, 
+        telefono: telefono, 
+        direccion: direccion, 
+        skipStripe: stripeHabilitado ? 'false' : 'true' 
+      });
+      
+      script.src = APPS_SCRIPT_URL + '?' + params.toString(); 
+      document.body.appendChild(script);
     }
 
     function mostrarMensaje(texto, tipo) { const msg = document.getElementById('mensaje'); msg.textContent = texto; msg.className = 'mensaje ' + tipo; }
@@ -465,6 +613,7 @@
       cargarConfig(); 
       cargarSlider(); 
       cargarProductos(); 
+      cargarResenasPublicas();
     });
   </script>
 </body>
