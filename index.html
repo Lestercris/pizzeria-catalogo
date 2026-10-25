@@ -97,6 +97,13 @@
     .footer-col a { color: #f1c40f; text-decoration: none; }
     .footer-col a:hover { text-decoration: underline; }
     
+    /* Mapa y botón GPS */
+    .mapa-container { margin-top: 15px; border-radius: 8px; overflow: hidden; border: 2px solid #34495e; display: none; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    .mapa-container iframe { display: block; width: 100%; height: 180px; border: 0; }
+    
+    .btn-gps { display: none; margin-top: 10px; background: #27ae60; color: white !important; text-align: center; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; transition: background 0.2s; }
+    .btn-gps:hover { background: #219150; text-decoration: none !important; }
+
     .resena { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #f1c40f; }
     .estrellas { color: #f1c40f; font-size: 1rem; margin-bottom: 5px; }
     .resena p { font-size: 0.85rem; font-style: italic; margin: 0; color: #bdc3c7; }
@@ -169,6 +176,12 @@
         <h3>📍 Dónde estamos</h3>
         <p id="footer-direccion">Cargando dirección...</p>
         <p>📞 <a id="footer-telefono" href="#">Cargando...</a></p>
+        
+        <!-- MAPA Y BOTÓN GPS -->
+        <div id="mapa-container" class="mapa-container">
+          <iframe id="mapa-iframe" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <a id="btn-gps" href="#" target="_blank" class="btn-gps">🚗 Cómo llegar (Abrir GPS)</a>
       </div>
       
       <div class="footer-col">
@@ -210,7 +223,7 @@
   </a>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydeHZ6LbFZliq-Gz1u0Vn2E-fScXY0xJ1DxysH6OhQh6VtyWUOIvpONgy73u1Q0Ffi2g/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcyQJH-LIV5Z23KF9T1qbXVH2c6f5hJ9nj7kUjpm2289xPms30ej4HoDAE5sxyOTEDMg/exec';
     const MONEDA = '€';
     const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160"><rect width="100%" height="100%" fill="#f1f1f1"/><text x="150" y="86" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#b0b0b0">Sin imagen</text></svg>');
 
@@ -274,7 +287,24 @@
           document.getElementById('footer-nombre').textContent = data.NombreNegocio;
           document.title = '🍕 ' + data.NombreNegocio;
         }
-        if (data.Direccion) document.getElementById('footer-direccion').innerHTML = data.Direccion;
+
+        if (data.Direccion) {
+          document.getElementById('footer-direccion').innerHTML = data.Direccion;
+          
+          const dirCodificada = encodeURIComponent(data.Direccion);
+          
+          // Generar mapa
+          const mapaIframe = document.getElementById('mapa-iframe');
+          const mapaContainer = document.getElementById('mapa-container');
+          mapaIframe.src = `https://maps.google.com/maps?q=${dirCodificada}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+          mapaContainer.style.display = 'block';
+          
+          // Generar enlace de GPS
+          const btnGps = document.getElementById('btn-gps');
+          btnGps.href = `https://www.google.com/maps/search/?api=1&query=${dirCodificada}`;
+          btnGps.style.display = 'block';
+        }
+
         if (data.Horario) document.getElementById('footer-horario').innerHTML = data.Horario;
         
         if (data.Telefono) {
