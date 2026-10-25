@@ -14,8 +14,8 @@
     h2 { color: #2c3e50; font-size: 24px; margin-bottom: 10px; text-align: center; }
     .subtitle { color: #7f8c8d; font-size: 14px; text-align: center; margin-bottom: 30px; line-height: 1.5; }
     label { display: block; font-size: 13px; color: #34495e; font-weight: 600; margin-bottom: 8px; }
-    input, select { width: 100%; padding: 14px; margin-bottom: 20px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 15px; transition: all 0.3s ease; background: #f8f9fa; }
-    input:focus, select:focus { outline: none; border-color: #c0392b; background: white; box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1); }
+    input, select, textarea { width: 100%; padding: 14px; margin-bottom: 20px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 15px; transition: all 0.3s ease; background: #f8f9fa; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #c0392b; background: white; box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1); }
     input:disabled { opacity: .6; cursor: not-allowed; }
     button { background: #c0392b; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background 0.3s, transform 0.1s; }
     button:hover { background: #a93226; }
@@ -39,7 +39,6 @@
     .btn-salir:hover { background: #dfe6e9; }
     .aviso { background: #fff9e6; border-left: 4px solid #f1c40f; padding: 12px 14px; border-radius: 6px; font-size: 12.5px; color: #7d6608; margin-bottom: 20px; line-height: 1.5; }
     
-    /* Tabla de Productos */
     .tabla-container { width: 100%; overflow-x: auto; margin-bottom: 30px; }
     table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 5px rgba(0,0,0,0.05); }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
@@ -53,7 +52,6 @@
     .btn-action.delete { background: #e74c3c; }
     .btn-action.toggle { background: #f39c12; }
 
-    /* Slider de portada */
     .slide-item { display: flex; gap: 10px; align-items: center; background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: 8px; }
     .slide-item img { width: 84px; height: 56px; object-fit: cover; border-radius: 6px; background: #eee; flex: 0 0 auto; }
     .slide-item .campos { display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto; min-width: 0; }
@@ -82,7 +80,7 @@
   <div id="login-msg" class="msg"></div>
 </div>
 
-<div class="card hidden" id="panel-section" style="max-width: 800px;">
+<div class="card hidden" id="panel-section" style="max-width: 900px;">
   <div class="topbar">
     <h2>⚙️ Gestión</h2>
     <button class="btn-salir" type="button" onclick="salir()">Cerrar sesión</button>
@@ -90,7 +88,6 @@
   <p class="subtitle">Actualiza la información y las fotos de tu catálogo en tiempo real.</p>
   <div class="aviso">La sesión caduca tras 2 horas de inactividad.</div>
 
-  <!-- AJUSTES DEL NEGOCIO -->
   <div style="margin-bottom: 25px; padding: 20px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 8px;">
     <h3 style="margin-top:0; font-size: 16px; color: #856404;">Ajustes de la Web (Públicos)</h3>
     
@@ -103,7 +100,7 @@
     <label style="display: block; font-size: 13px; font-weight: 600;">Dirección</label>
     <input type="text" id="config-direccion" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
     
-    <label style="display: block; font-size: 13px; font-weight: 600;">Teléfono (ej: +346601860462)</label>
+    <label style="display: block; font-size: 13px; font-weight: 600;">Teléfono (ej: +34601860462)</label>
     <input type="text" id="config-telefono" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
     
     <label style="display: block; font-size: 13px; font-weight: 600;">Horario</label>
@@ -113,7 +110,6 @@
     <div id="config-msg" class="msg" style="margin-top: 10px;"></div>
   </div>
 
-  <!-- CONFIGURACIÓN DE STRIPE -->
   <div style="margin-bottom: 25px; padding: 20px; background: #e8f4f8; border-left: 5px solid #3498db; border-radius: 8px;">
     <h3 style="margin-top:0; font-size: 16px; color: #2980b9;">Configuración de Pagos</h3>
     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px; font-weight: normal;">
@@ -124,7 +120,6 @@
     <div id="stripe-msg" class="msg"></div>
   </div>
 
-  <!-- SLIDER -->
   <div style="margin-bottom: 25px; padding: 20px; background: #fdf6ec; border-left: 5px solid #e67e22; border-radius: 8px;">
     <h3 style="margin-top:0; font-size: 16px; color: #d35400;">🖼️ Imágenes de Portada (Slider)</h3>
     <p style="font-size: 12px; color: #7f8c8d; margin-top: 0; margin-bottom: 14px;">Se muestran justo debajo del título. Máximo 10.</p>
@@ -138,7 +133,26 @@
     <div id="slider-progress" class="upload-progress"></div>
   </div>
 
-  <!-- TABLA DE PRODUCTOS -->
+  <div style="margin-bottom: 25px; padding: 20px; background: #e8f4f8; border-left: 5px solid #3498db; border-radius: 8px;">
+    <h3 style="margin-top:0; font-size: 16px; color: #2c3e50;">⭐ Moderación de Reseñas</h3>
+    <p style="font-size: 12px; color: #7f8c8d; margin-bottom: 10px;">Aprueba o elimina las reseñas de los clientes.</p>
+    <div class="tabla-container">
+      <table id="tabla-resenas" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Estrellas</th>
+            <th>Comentario</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-resenas"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div style="margin-bottom: 25px; padding: 20px; background: #f4f6f7; border-left: 5px solid #7f8c8d; border-radius: 8px;">
     <h3 style="margin-top:0; font-size: 16px; color: #2c3e50;">📋 Lista de Productos</h3>
     <div class="tabla-container">
@@ -158,7 +172,6 @@
     </div>
   </div>
 
-  <!-- FORMULARIO DE PRODUCTOS -->
   <h3 style="margin-top:0; font-size: 16px; color: #2c3e50; margin-bottom: 15px;">➕ Añadir / Editar Producto</h3>
   
   <label for="select-product">Seleccionar Producto Rápido:</label>
@@ -224,11 +237,11 @@
 <input type="file" id="subida-archivo" accept="image/*" style="display: none;" onchange="procesarFotos(this)">
 
 <script>
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwh6A7GYJ7s6jXzjfJWj3i7eBpmjhF1nvIshZ6Q6nEIXc19EFz1IyeEgEOWCVKtc9ViFg/exec';
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydeHZ6LbFZliq-Gz1u0Vn2E-fScXY0xJ1DxysH6OhQh6VtyWUOIvpONgy73u1Q0Ffi2g/exec';
   const CLAVE_TOKEN = 'hr_adm_token';
   const TIMEOUT_JSONP = 30000;
 
-  let productosGlobal = [], tokenAdmin = '', imagenesActuales = [], sliderItems = [], destinoSubida = 'slider';
+  let productosGlobal = [], resenasGlobal = [], tokenAdmin = '', imagenesActuales = [], sliderItems = [], destinoSubida = 'slider';
 
   function mostrarMsg(id, texto, tipo) { const el = document.getElementById(id); if (!el) return; el.textContent = texto; el.className = 'msg ' + tipo; }
   function ocultarMsg(id) { const el = document.getElementById(id); if (!el) return; el.textContent = ''; el.className = 'msg'; }
@@ -314,17 +327,72 @@
     sliderItems = Array.isArray(res.slider) ? res.slider : [];
     renderizarSlider();
     renderTablaProductos();
+    await cargarResenasAdmin();
     ocultarMsg('panel-msg'); ocultarMsg('slider-msg'); ocultarMsg('stripe-msg'); ocultarMsg('config-msg');
   }
 
   async function salir() { const t = tokenAdmin; volverAlLogin(); sliderItems = []; imagenesActuales = []; if (t) { try { await jsonpRequest({ action: 'logout', token: t }); } catch (e) {} } }
 
-  // --- TABLA DE PRODUCTOS ---
+  async function cargarResenasAdmin() {
+    try {
+      const res = await jsonpRequest({ action: 'getAdminReviews', token: tokenAdmin });
+      if (res && Array.isArray(res)) {
+        resenasGlobal = res;
+        renderTablaResenas();
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  function renderTablaResenas() {
+    const tbody = document.getElementById('tbody-resenas');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (resenasGlobal.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay reseñas aún.</td></tr>';
+      return;
+    }
+
+    resenasGlobal.forEach(r => {
+      const tr = document.createElement('tr');
+      const estrellas = '★'.repeat(r.Estrellas) + '☆'.repeat(5 - r.Estrellas);
+      const badgeClass = r.Aprobada ? 'badge si' : 'badge no';
+      const badgeText = r.Aprobada ? 'Visible' : 'Pendiente';
+
+      tr.innerHTML = `
+        <td>${r.Fecha}</td>
+        <td><strong>${r.Nombre}</strong></td>
+        <td style="color: #f1c40f; font-size: 16px;">${estrellas}</td>
+        <td style="max-width: 200px;">${r.Comentario}</td>
+        <td><span class="${badgeClass}">${badgeText}</span></td>
+        <td class="acciones-td">
+          <button class="btn-action toggle" onclick="toggleResena('${r.ID}')">${r.Aprobada ? 'Ocultar' : 'Aprobar'}</button>
+          <button class="btn-action delete" onclick="borrarResena('${r.ID}')">🗑️</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function toggleResena(id) {
+    try {
+      const res = await jsonpRequest({ action: 'toggleReview', id: id, token: tokenAdmin });
+      if (res && res.success) await cargarResenasAdmin();
+    } catch (e) { alert('Error al cambiar estado.'); }
+  }
+
+  async function borrarResena(id) {
+    if (!confirm('¿Eliminar esta reseña permanentemente?')) return;
+    try {
+      const res = await jsonpRequest({ action: 'deleteReview', id: id, token: tokenAdmin });
+      if (res && res.success) await cargarResenasAdmin();
+    } catch (e) { alert('Error al borrar.'); }
+  }
+
   function renderTablaProductos() {
     const tbody = document.getElementById('tbody-productos');
     tbody.innerHTML = '';
     
-    // Actualizar el selector
     const select = document.getElementById('select-product');
     select.innerHTML = '<option value="">-- Crear Nuevo Producto --</option>';
     
@@ -335,7 +403,6 @@
 
     productosGlobal.forEach(function(p) {
       const tr = document.createElement('tr');
-      
       const disponible = String(p.Disponible).toLowerCase() === 'si' || p.Disponible === true;
       const badgeClass = disponible ? 'badge si' : 'badge no';
       const badgeText = disponible ? 'Visible' : 'Oculto';
@@ -354,7 +421,6 @@
       `;
       tbody.appendChild(tr);
 
-      // Llenar el select
       const opt = document.createElement('option');
       opt.value = p.ID;
       opt.textContent = p.ID + ' - ' + p.Nombre;
@@ -371,40 +437,27 @@
   async function toggleDisponibilidad(id, estadoActual) {
     const p = productosGlobal.find(x => String(x.ID) === String(id));
     if (!p) return;
-    
-    // Clonamos el producto y cambiamos su disponibilidad
     const copia = Object.assign({}, p);
     copia.Disponible = estadoActual === 'si' ? 'no' : 'si';
     
     try {
       const res = await jsonpRequest({ action: 'saveProduct', token: tokenAdmin, productData: JSON.stringify(copia) });
-      if (res && res.success) {
-        await entrarAlPanel(); // Recargar datos
-      } else {
-        alert('Error al cambiar el estado: ' + res.error);
-      }
-    } catch (e) {
-      alert('Error de conexión.');
-    }
+      if (res && res.success) await entrarAlPanel();
+      else alert('Error al cambiar el estado: ' + res.error);
+    } catch (e) { alert('Error de conexión.'); }
   }
 
   async function eliminarProducto(id) {
-    if (!confirm('¿Estás seguro de que deseas eliminar el producto ' + id + '? Esta acción no se puede deshacer.')) return;
-    
+    if (!confirm('¿Estás seguro de que deseas eliminar el producto ' + id + '?')) return;
     try {
       const res = await jsonpRequest({ action: 'deleteProduct', id: id, token: tokenAdmin });
       if (res && res.success) {
-        await entrarAlPanel(); // Recargar datos
+        await entrarAlPanel();
         mostrarMsg('panel-msg', 'Producto eliminado correctamente.', 'ok');
-      } else {
-        alert('Error al eliminar: ' + res.error);
-      }
-    } catch (e) {
-      alert('Error de conexión.');
-    }
+      } else alert('Error al eliminar: ' + res.error);
+    } catch (e) { alert('Error de conexión.'); }
   }
 
-  // --- RESTO DE FUNCIONES ---
   function renderizarSlider() {
     const cont = document.getElementById('slider-lista');
     if (!cont) return;
