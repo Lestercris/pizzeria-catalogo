@@ -38,6 +38,22 @@
     .btn-salir { width: auto; padding: 9px 14px; background: #ecf0f1; color: #34495e; font-size: 13px; border-radius: 8px; }
     .btn-salir:hover { background: #dfe6e9; }
     .aviso { background: #fff9e6; border-left: 4px solid #f1c40f; padding: 12px 14px; border-radius: 6px; font-size: 12.5px; color: #7d6608; margin-bottom: 20px; line-height: 1.5; }
+    
+    /* Tabla de Productos */
+    .tabla-container { width: 100%; overflow-x: auto; margin-bottom: 30px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 5px rgba(0,0,0,0.05); }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+    th { background: #f8f9fa; color: #34495e; font-weight: 600; }
+    tr:hover { background: #fdfdfd; }
+    .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    .badge.si { background: #d4edda; color: #155724; }
+    .badge.no { background: #f8d7da; color: #721c24; }
+    .acciones-td { display: flex; gap: 5px; }
+    .btn-action { background: #3498db; border: none; padding: 5px 8px; border-radius: 4px; color: white; cursor: pointer; font-size: 11px; }
+    .btn-action.delete { background: #e74c3c; }
+    .btn-action.toggle { background: #f39c12; }
+
+    /* Slider de portada */
     .slide-item { display: flex; gap: 10px; align-items: center; background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: 8px; }
     .slide-item img { width: 84px; height: 56px; object-fit: cover; border-radius: 6px; background: #eee; flex: 0 0 auto; }
     .slide-item .campos { display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto; min-width: 0; }
@@ -66,7 +82,7 @@
   <div id="login-msg" class="msg"></div>
 </div>
 
-<div class="card hidden" id="panel-section" style="max-width: 700px;">
+<div class="card hidden" id="panel-section" style="max-width: 800px;">
   <div class="topbar">
     <h2>⚙️ Gestión</h2>
     <button class="btn-salir" type="button" onclick="salir()">Cerrar sesión</button>
@@ -122,15 +138,37 @@
     <div id="slider-progress" class="upload-progress"></div>
   </div>
 
-  <!-- PRODUCTOS -->
-  <label for="select-product">Seleccionar Producto para Editar:</label>
+  <!-- TABLA DE PRODUCTOS -->
+  <div style="margin-bottom: 25px; padding: 20px; background: #f4f6f7; border-left: 5px solid #7f8c8d; border-radius: 8px;">
+    <h3 style="margin-top:0; font-size: 16px; color: #2c3e50;">📋 Lista de Productos</h3>
+    <div class="tabla-container">
+      <table id="tabla-productos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-productos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORMULARIO DE PRODUCTOS -->
+  <h3 style="margin-top:0; font-size: 16px; color: #2c3e50; margin-bottom: 15px;">➕ Añadir / Editar Producto</h3>
+  
+  <label for="select-product">Seleccionar Producto Rápido:</label>
   <select id="select-product" onchange="cargarProducto()">
     <option value="">-- Crear Nuevo Producto --</option>
   </select>
 
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
     <div>
-      <label for="p-id">ID del Producto</label>
+      <label for="p-id">ID del Producto (Único)</label>
       <input type="text" id="p-id" placeholder="Ej. P07" maxlength="20" required>
     </div>
     <div>
@@ -140,27 +178,33 @@
   </div>
 
   <label for="p-nombre">Nombre del Producto</label>
-  <input type="text" id="p-nombre" placeholder="Ej. Pizza Barbacoa" maxlength="80" required>
+  <input type="text" id="p-nombre" placeholder="Ej. Coca-Cola 33cl" maxlength="80" required>
 
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
     <div>
-      <label for="p-categoria">Categoría</label>
-      <input type="text" id="p-categoria" placeholder="Ej. Pizzas" value="Pizzas" maxlength="40">
+      <label for="p-categoria">Categoría (Bebidas, Postres, Pizzas...)</label>
+      <select id="p-categoria">
+        <option value="Pizzas">Pizzas</option>
+        <option value="Entrantes">Entrantes</option>
+        <option value="Bebidas">Bebidas</option>
+        <option value="Postres">Postres</option>
+        <option value="Otros">Otros</option>
+      </select>
     </div>
     <div>
       <label for="p-disponible">Disponible en la Web</label>
       <select id="p-disponible">
-        <option value="si">Sí, mostrar en el catálogo</option>
-        <option value="no">No, ocultar temporalmente</option>
+        <option value="si">Sí, mostrar</option>
+        <option value="no">No, ocultar</option>
       </select>
     </div>
   </div>
 
   <label for="p-desc">Descripción corta</label>
-  <input type="text" id="p-desc" placeholder="Ej. Deliciosa pizza con carne y bacon" maxlength="300">
+  <input type="text" id="p-desc" placeholder="Ej. Refresco de 33cl" maxlength="300">
 
-  <label for="p-ingredientes">Ingredientes</label>
-  <input type="text" id="p-ingredientes" placeholder="Ej. Tomate, mozzarella, carne, bacon" maxlength="300">
+  <label for="p-ingredientes">Detalles / Ingredientes</label>
+  <input type="text" id="p-ingredientes" placeholder="Ej. Frío, con hielo y limón" maxlength="300">
 
   <div style="border: 2px dashed #bdc3c7; padding: 20px; border-radius: 12px; background: #f8f9fa; margin-bottom: 25px;">
     <h3 style="margin-top:0; font-size: 15px; color: #2c3e50; margin-bottom: 15px;">📸 Galería de Imágenes</h3>
@@ -180,8 +224,7 @@
 <input type="file" id="subida-archivo" accept="image/*" style="display: none;" onchange="procesarFotos(this)">
 
 <script>
-  // URL INTACTA
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRphH-U-yKwEOOK_p175FLVs0wGlhIqmMmqBooIFDavM28mIER2McjASg-mUokTpeGvA/exec';
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwh6A7GYJ7s6jXzjfJWj3i7eBpmjhF1nvIshZ6Q6nEIXc19EFz1IyeEgEOWCVKtc9ViFg/exec';
   const CLAVE_TOKEN = 'hr_adm_token';
   const TIMEOUT_JSONP = 30000;
 
@@ -257,10 +300,6 @@
     document.getElementById('login-section').classList.add('hidden');
     document.getElementById('panel-section').classList.remove('hidden');
     
-    const select = document.getElementById('select-product');
-    select.innerHTML = '<option value="">-- Crear Nuevo Producto --</option>';
-    productosGlobal.forEach(function (p) { const opt = document.createElement('option'); opt.value = p.ID; opt.textContent = p.ID + ' - ' + p.Nombre; select.appendChild(opt); });
-    
     if (res.config) { 
       const val = res.config.StripeHabilitado; 
       document.getElementById('config-stripe').checked = val === true || String(val).toLowerCase() === 'true'; 
@@ -274,14 +313,98 @@
 
     sliderItems = Array.isArray(res.slider) ? res.slider : [];
     renderizarSlider();
+    renderTablaProductos();
     ocultarMsg('panel-msg'); ocultarMsg('slider-msg'); ocultarMsg('stripe-msg'); ocultarMsg('config-msg');
   }
 
   async function salir() { const t = tokenAdmin; volverAlLogin(); sliderItems = []; imagenesActuales = []; if (t) { try { await jsonpRequest({ action: 'logout', token: t }); } catch (e) {} } }
 
-  const IMG_VACIA = 'data:image/svg+xml;charset=utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="84" height="56"><rect width="84" height="56" fill="#e9e9e9"/><text x="42" y="32" font-size="9" fill="#aaa" text-anchor="middle">sin imagen</text></svg>');
-  function miniatura(img, url) { if (!url) { img.src = IMG_VACIA; return; } img.onerror = function () { this.onerror = null; this.src = IMG_VACIA; }; img.src = url; }
+  // --- TABLA DE PRODUCTOS ---
+  function renderTablaProductos() {
+    const tbody = document.getElementById('tbody-productos');
+    tbody.innerHTML = '';
+    
+    // Actualizar el selector
+    const select = document.getElementById('select-product');
+    select.innerHTML = '<option value="">-- Crear Nuevo Producto --</option>';
+    
+    if (!productosGlobal.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No hay productos aún.</td></tr>';
+      return;
+    }
 
+    productosGlobal.forEach(function(p) {
+      const tr = document.createElement('tr');
+      
+      const disponible = String(p.Disponible).toLowerCase() === 'si' || p.Disponible === true;
+      const badgeClass = disponible ? 'badge si' : 'badge no';
+      const badgeText = disponible ? 'Visible' : 'Oculto';
+
+      tr.innerHTML = `
+        <td><strong>${p.ID}</strong></td>
+        <td>${p.Nombre}</td>
+        <td>${p.Categoria || 'Otros'}</td>
+        <td>${Number(p.Precio).toFixed(2)}€</td>
+        <td><span class="${badgeClass}">${badgeText}</span></td>
+        <td class="acciones-td">
+          <button class="btn-action toggle" onclick="toggleDisponibilidad('${p.ID}', '${disponible ? 'si' : 'no'}')">👁️</button>
+          <button class="btn-action" onclick="editarProductoDesdeTabla('${p.ID}')">✏️</button>
+          <button class="btn-action delete" onclick="eliminarProducto('${p.ID}')">🗑️</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+
+      // Llenar el select
+      const opt = document.createElement('option');
+      opt.value = p.ID;
+      opt.textContent = p.ID + ' - ' + p.Nombre;
+      select.appendChild(opt);
+    });
+  }
+
+  function editarProductoDesdeTabla(id) {
+    document.getElementById('select-product').value = id;
+    cargarProducto();
+    document.getElementById('select-product').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function toggleDisponibilidad(id, estadoActual) {
+    const p = productosGlobal.find(x => String(x.ID) === String(id));
+    if (!p) return;
+    
+    // Clonamos el producto y cambiamos su disponibilidad
+    const copia = Object.assign({}, p);
+    copia.Disponible = estadoActual === 'si' ? 'no' : 'si';
+    
+    try {
+      const res = await jsonpRequest({ action: 'saveProduct', token: tokenAdmin, productData: JSON.stringify(copia) });
+      if (res && res.success) {
+        await entrarAlPanel(); // Recargar datos
+      } else {
+        alert('Error al cambiar el estado: ' + res.error);
+      }
+    } catch (e) {
+      alert('Error de conexión.');
+    }
+  }
+
+  async function eliminarProducto(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar el producto ' + id + '? Esta acción no se puede deshacer.')) return;
+    
+    try {
+      const res = await jsonpRequest({ action: 'deleteProduct', id: id, token: tokenAdmin });
+      if (res && res.success) {
+        await entrarAlPanel(); // Recargar datos
+        mostrarMsg('panel-msg', 'Producto eliminado correctamente.', 'ok');
+      } else {
+        alert('Error al eliminar: ' + res.error);
+      }
+    } catch (e) {
+      alert('Error de conexión.');
+    }
+  }
+
+  // --- RESTO DE FUNCIONES ---
   function renderizarSlider() {
     const cont = document.getElementById('slider-lista');
     if (!cont) return;
@@ -327,6 +450,9 @@
     } catch (e) { mostrarMsg('slider-msg', e.message || 'Error de conexión.', 'error'); } finally { btn.disabled = false; btn.textContent = 'Guardar slider'; }
   }
 
+  const IMG_VACIA = 'data:image/svg+xml;charset=utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="84" height="56"><rect width="84" height="56" fill="#e9e9e9"/><text x="42" y="32" font-size="9" fill="#aaa" text-anchor="middle">sin imagen</text></svg>');
+  function miniatura(img, url) { if (!url) { img.src = IMG_VACIA; return; } img.onerror = function () { this.onerror = null; this.src = IMG_VACIA; }; img.src = url; }
+
   function pedirFoto(destino) { destinoSubida = destino; const input = document.getElementById('subida-archivo'); input.value = ''; input.click(); }
 
   async function comprimirImagen(archivo, maxLado, calidad) {
@@ -368,11 +494,9 @@
 
     const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData });
     if (!response.ok) throw new Error('Error de red al subir la foto.');
-    
     const text = await response.text();
     let res;
     try { res = JSON.parse(text); } catch(e) { throw new Error('El servidor devolvió un formato inesperado.'); }
-
     if (!res || !res.success || !res.url) throw new Error((res && res.error) || 'No se pudo subir la foto.');
     return res.url;
   }
@@ -389,15 +513,12 @@
     for (let i = 0; i < archivos.length; i++) {
       const cuantas = esSlider ? sliderItems.length : imagenesActuales.length;
       if (cuantas >= limite) { mostrarMsg(msgId, 'Máximo ' + limite + ' fotos.', 'error'); break; }
-      
       try {
         mostrarProgreso(progId, '⏳ Procesando y subiendo ' + (i + 1) + ' de ' + archivos.length + '...');
         mostrarMsg(msgId, '', 'ok');
-        
         const reducida = await comprimirImagen(archivos[i]);
         const base64 = await fileToBase64(reducida);
         const url = await subirFotoAlServidor(base64, reducida.type || 'image/jpeg');
-        
         if (esSlider) { 
           sliderItems.push({ ID: '', URL: url, Titulo: '', Activo: true }); 
           renderizarSlider(); 
@@ -417,10 +538,27 @@
 
   function cargarProducto() {
     const id = document.getElementById('select-product').value;
-    if (!id) { document.getElementById('p-id').value = ''; document.getElementById('p-nombre').value = ''; document.getElementById('p-precio').value = ''; document.getElementById('p-desc').value = ''; document.getElementById('p-ingredientes').value = ''; document.getElementById('p-categoria').value = 'Pizzas'; document.getElementById('p-disponible').value = 'si'; imagenesActuales = []; renderizarGaleria(); return; }
+    if (!id) { 
+      document.getElementById('p-id').value = ''; 
+      document.getElementById('p-nombre').value = ''; 
+      document.getElementById('p-precio').value = ''; 
+      document.getElementById('p-desc').value = ''; 
+      document.getElementById('p-ingredientes').value = ''; 
+      document.getElementById('p-categoria').value = 'Pizzas'; 
+      document.getElementById('p-disponible').value = 'si'; 
+      imagenesActuales = []; 
+      renderizarGaleria(); 
+      return; 
+    }
     const p = productosGlobal.find(function (x) { return String(x.ID) === String(id); });
     if (!p) return;
-    document.getElementById('p-id').value = p.ID || ''; document.getElementById('p-nombre').value = p.Nombre || ''; document.getElementById('p-categoria').value = p.Categoria || ''; document.getElementById('p-precio').value = p.Precio != null ? p.Precio : ''; document.getElementById('p-desc').value = p.Descripcion || ''; document.getElementById('p-ingredientes').value = p.Ingredientes || '';
+    document.getElementById('p-id').value = p.ID || ''; 
+    document.getElementById('p-nombre').value = p.Nombre || ''; 
+    document.getElementById('p-categoria').value = p.Categoria || 'Pizzas'; 
+    document.getElementById('p-precio').value = p.Precio != null ? p.Precio : ''; 
+    document.getElementById('p-desc').value = p.Descripcion || ''; 
+    document.getElementById('p-ingredientes').value = p.Ingredientes || '';
+    
     const disp = String(p.Disponible).trim().toLowerCase();
     document.getElementById('p-disponible').value = (disp === 'si' || disp === 'true' || p.Disponible === true) ? 'si' : 'no';
     const raw = p.ImagenURL || p.Imagen || '';
@@ -453,7 +591,7 @@
   async function guardarProducto() {
     const btn = document.getElementById('btn-guardar'); const original = btn.textContent;
     const precio = precioNum(document.getElementById('p-precio').value);
-    const prod = { ID: document.getElementById('p-id').value.trim().toUpperCase(), Nombre: document.getElementById('p-nombre').value.trim(), Categoria: document.getElementById('p-categoria').value.trim(), Precio: precio, Descripcion: document.getElementById('p-desc').value.trim(), Ingredientes: document.getElementById('p-ingredientes').value.trim(), ImagenURL: imagenesActuales.join(','), Disponible: document.getElementById('p-disponible').value };
+    const prod = { ID: document.getElementById('p-id').value.trim().toUpperCase(), Nombre: document.getElementById('p-nombre').value.trim(), Categoria: document.getElementById('p-categoria').value, Precio: precio, Descripcion: document.getElementById('p-desc').value.trim(), Ingredientes: document.getElementById('p-ingredientes').value.trim(), ImagenURL: imagenesActuales.join(','), Disponible: document.getElementById('p-disponible').value };
     if (!prod.ID) { mostrarMsg('panel-msg', 'El ID es obligatorio.', 'error'); return; }
     if (!/^[A-Za-z0-9_-]{1,20}$/.test(prod.ID)) { mostrarMsg('panel-msg', 'El ID solo admite letras, números, guion y guion bajo.', 'error'); return; }
     if (!prod.Nombre) { mostrarMsg('panel-msg', 'El nombre es obligatorio.', 'error'); return; }
@@ -463,7 +601,12 @@
     try {
       const res = await jsonpRequest({ action: 'saveProduct', token: tokenAdmin, productData: JSON.stringify(prod) });
       if (sesionInvalida(res)) { volverAlLogin('Tu sesión caducó. Vuelve a entrar.'); return; }
-      if (res && res.success) { await entrarAlPanel(); document.getElementById('select-product').value = prod.ID; cargarProducto(); mostrarMsg('panel-msg', res.message || 'Guardado.', 'ok'); }
+      if (res && res.success) { 
+        await entrarAlPanel(); 
+        document.getElementById('select-product').value = prod.ID; 
+        cargarProducto(); 
+        mostrarMsg('panel-msg', res.message || 'Guardado.', 'ok'); 
+      }
       else { mostrarMsg('panel-msg', 'Error: ' + ((res && res.error) || 'no se pudo guardar.'), 'error'); }
     } catch (e) { mostrarMsg('panel-msg', 'Error de conexión: ' + (e.message || ''), 'error'); } finally { btn.disabled = false; btn.textContent = original; }
   }
