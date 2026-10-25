@@ -83,7 +83,22 @@
     <p style="font-size: 12px; color: #7f8c8d; margin-left: 30px;">Si está desactivado, los clientes coordinarán el pago por WhatsApp.</p>
     <div id="stripe-msg" class="msg"></div>
   </div>
+<!-- AÑADIR ESTO JUSTO DEBAJO DEL DIV DE STRIPE (antes del slider) -->
+<div style="margin-bottom: 25px; padding: 20px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 8px;">
+  <h3 style="margin-top:0; font-size: 16px; color: #856404;">Ajustes de la Web</h3>
+  
+  <label style="margin-top: 10px; display: block; font-size: 13px; font-weight: 600;">Promoción del día (Dejar vacío para ocultar)</label>
+  <input type="text" id="config-promo" placeholder="Ej: ¡Hoy 2x1 en pizzas familiares!" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+  
+  <label style="display: block; font-size: 13px; font-weight: 600;">Dirección</label>
+  <input type="text" id="config-direccion" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+  
+  <label style="display: block; font-size: 13px; font-weight: 600;">Horario</label>
+  <input type="text" id="config-horario" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
 
+  <button type="button" onclick="guardarAjustesWeb()" style="background: #f39c12; width: auto; padding: 10px 20px;">Guardar Ajustes de la Web</button>
+  <div id="config-msg" class="msg" style="margin-top: 10px;"></div>
+</div>
   <div style="margin-bottom: 25px; padding: 20px; background: #fdf6ec; border-left: 5px solid #e67e22; border-radius: 8px;">
     <h3 style="margin-top:0; font-size: 16px; color: #d35400;">🖼️ Imágenes de Portada (Slider)</h3>
     <p style="font-size: 12px; color: #7f8c8d; margin-top: 0; margin-bottom: 14px;">Se muestran justo debajo del título de la web. Usa las flechas para cambiar el orden. Máximo 10.</p>
@@ -454,6 +469,22 @@
     const guardado = leerToken(); if (!guardado) return; tokenAdmin = guardado;
     try { await entrarAlPanel(); } catch (e) { guardarToken(''); }
   });
+  <!-- AÑADIR ESTO JUSTO DEBAJO DEL DIV DE STRIPE (antes del slider) -->
+<div style="margin-bottom: 25px; padding: 20px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 8px;">
+  <h3 style="margin-top:0; font-size: 16px; color: #856404;">Ajustes de la Web</h3>
+  
+  <label style="margin-top: 10px; display: block; font-size: 13px; font-weight: 600;">Promoción del día (Dejar vacío para ocultar)</label>
+  <input type="text" id="config-promo" placeholder="Ej: ¡Hoy 2x1 en pizzas familiares!" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+  
+  <label style="display: block; font-size: 13px; font-weight: 600;">Dirección</label>
+  <input type="text" id="config-direccion" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+  
+  <label style="display: block; font-size: 13px; font-weight: 600;">Horario</label>
+  <input type="text" id="config-horario" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+
+  <button type="button" onclick="guardarAjustesWeb()" style="background: #f39c12; width: auto; padding: 10px 20px;">Guardar Ajustes de la Web</button>
+  <div id="config-msg" class="msg" style="margin-top: 10px;"></div>
+</div>
 </script>
 </body>
 </html>
